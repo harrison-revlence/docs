@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revlence — Smart Ingestion Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f9fc;
+    --surface-1: #ffffff;
+    --surface-2: #f2f4f8;
+    --surface-3: #ebeef5;
+    --border: #dde1ec;
+    --border-accent: #b8c0d8;
+    --text: #1a1d2e;
+    --text-dim: #505775;
+    --text-muted: #8890a8;
+
+    /* Phase colours */
+    --gate-amber: #d19a00;
+    --gate-amber-bg: rgba(209, 154, 0, 0.07);
+    --gate-amber-border: rgba(209, 154, 0, 0.22);
+
+    --skip-red: #c62828;
+    --skip-red-bg: rgba(198, 40, 40, 0.05);
+    --skip-red-border: rgba(198, 40, 40, 0.18);
+
+    --voice-green: #1b7d3a;
+    --voice-green-bg: rgba(27, 125, 58, 0.06);
+    --voice-green-border: rgba(27, 125, 58, 0.18);
+
+    --text-blue: #1565c0;
+    --text-blue-bg: rgba(21, 101, 192, 0.06);
+    --text-blue-border: rgba(21, 101, 192, 0.18);
+
+    --sentiment-pink: #ad1457;
+    --sentiment-pink-bg: rgba(173, 20, 87, 0.06);
+    --sentiment-pink-border: rgba(173, 20, 87, 0.18);
+
+    --cleanse-purple: #6a1b9a;
+    --cleanse-purple-bg: rgba(106, 27, 154, 0.06);
+    --cleanse-purple-border: rgba(106, 27, 154, 0.18);
+
+    --enrich-teal: #00695c;
+    --enrich-teal-bg: rgba(0, 105, 92, 0.06);
+    --enrich-teal-border: rgba(0, 105, 92, 0.18);
+
+    --lookup-orange: #e65100;
+    --lookup-orange-bg: rgba(230, 81, 0, 0.06);
+    --lookup-orange-border: rgba(230, 81, 0, 0.18);
+
+    --issue-indigo: #283593;
+    --issue-indigo-bg: rgba(40, 53, 147, 0.06);
+    --issue-indigo-border: rgba(40, 53, 147, 0.18);
+
+    --bei-gold: #f57f17;
+    --bei-gold-bg: rgba(245, 127, 23, 0.08);
+    --bei-gold-border: rgba(245, 127, 23, 0.25);
+
+    --output-brown: #4e342e;
+    --output-brown-bg: rgba(78, 52, 46, 0.05);
+    --output-brown-border: rgba(78, 52, 46, 0.15);
+
+    --handoff-violet: #6a1b9a;
+    --handoff-violet-bg: rgba(106, 27, 154, 0.08);
+    --handoff-violet-border: rgba(106, 27, 154, 0.22);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 64px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse 600px 400px at 15% 8%, rgba(40, 53, 147, 0.03), transparent),
+      radial-gradient(ellipse 500px 500px at 85% 92%, rgba(0, 105, 92, 0.025), transparent);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* --- HEADER --- */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--enrich-teal);
+    margin-bottom: 12px;
+  }
+
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .header p {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  /* --- MAIN CONTAINER --- */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 780px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* --- PHASE CARDS --- */
+  .phase-card {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 32px;
+    position: relative;
+    background: var(--surface-1);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .phase-card:hover {
+    border-color: var(--border-accent);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+  }
+
+  .phase-number {
+    position: absolute;
+    top: -11px;
+    left: 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 2px 12px;
+    border-radius: 10px;
+    border: 1px solid;
+  }
+
+  .phase-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    margin-top: 4px;
+  }
+
+  .phase-subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .card-divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 18px;
+  }
+
+  /* Phase colour variants */
+  .phase-card.gating {
+    border-color: var(--gate-amber-border);
+    box-shadow: 0 1px 12px var(--gate-amber-bg);
+  }
+  .phase-card.gating .phase-number {
+    background: var(--gate-amber-bg); border-color: var(--gate-amber-border); color: var(--gate-amber);
+  }
+  .phase-card.gating .phase-title { color: var(--gate-amber); }
+
+  .phase-card.processing {
+    border-color: var(--cleanse-purple-border);
+    box-shadow: 0 1px 12px var(--cleanse-purple-bg);
+  }
+  .phase-card.processing .phase-number {
+    background: var(--cleanse-purple-bg); border-color: var(--cleanse-purple-border); color: var(--cleanse-purple);
+  }
+  .phase-card.processing .phase-title { color: var(--cleanse-purple); }
+
+  .phase-card.enrichment {
+    border-color: var(--enrich-teal-border);
+    box-shadow: 0 1px 12px var(--enrich-teal-bg);
+  }
+  .phase-card.enrichment .phase-number {
+    background: var(--enrich-teal-bg); border-color: var(--enrich-teal-border); color: var(--enrich-teal);
+  }
+  .phase-card.enrichment .phase-title { color: var(--enrich-teal); }
+
+  .phase-card.linking {
+    border-color: var(--issue-indigo-border);
+    box-shadow: 0 1px 12px var(--issue-indigo-bg);
+  }
+  .phase-card.linking .phase-number {
+    background: var(--issue-indigo-bg); border-color: var(--issue-indigo-border); color: var(--issue-indigo);
+  }
+  .phase-card.linking .phase-title { color: var(--issue-indigo); }
+
+  /* --- FLOW STEPS --- */
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .flow-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .step-badge {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-top: 1px;
+    white-space: nowrap;
+    border: 1px solid;
+  }
+
+  .step-content {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.65;
+  }
+
+  .step-content strong { color: var(--text); font-weight: 600; }
+  .step-content code {
+    font-size: 11px;
+    color: var(--text);
+    background: var(--surface-3);
+    padding: 1px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  /* Badge colour variants */
+  .step-badge.gate { background: var(--gate-amber-bg); border-color: var(--gate-amber-border); color: var(--gate-amber); }
+  .step-badge.skip { background: var(--skip-red-bg); border-color: var(--skip-red-border); color: var(--skip-red); }
+  .step-badge.voice { background: var(--voice-green-bg); border-color: var(--voice-green-border); color: var(--voice-green); }
+  .step-badge.text-ch { background: var(--text-blue-bg); border-color: var(--text-blue-border); color: var(--text-blue); }
+  .step-badge.sentiment { background: var(--sentiment-pink-bg); border-color: var(--sentiment-pink-border); color: var(--sentiment-pink); }
+  .step-badge.cleanse { background: var(--cleanse-purple-bg); border-color: var(--cleanse-purple-border); color: var(--cleanse-purple); }
+  .step-badge.enrich { background: var(--enrich-teal-bg); border-color: var(--enrich-teal-border); color: var(--enrich-teal); }
+  .step-badge.lookup { background: var(--lookup-orange-bg); border-color: var(--lookup-orange-border); color: var(--lookup-orange); }
+  .step-badge.issue { background: var(--issue-indigo-bg); border-color: var(--issue-indigo-border); color: var(--issue-indigo); }
+  .step-badge.bei { background: var(--bei-gold-bg); border-color: var(--bei-gold-border); color: var(--bei-gold); }
+  .step-badge.output { background: var(--output-brown-bg); border-color: var(--output-brown-border); color: var(--output-brown); }
+  .step-badge.handoff { background: var(--handoff-violet-bg); border-color: var(--handoff-violet-border); color: var(--handoff-violet); }
+
+  /* --- BRANCH CONTAINER --- */
+  .branch-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 8px 0;
+  }
+
+  .branch-box {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    background: var(--surface-2);
+  }
+
+  .branch-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .branch-label.voice-label { color: var(--voice-green); }
+  .branch-label.text-label { color: var(--text-blue); }
+
+  .branch-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .branch-step {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .branch-step::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    font-weight: 600;
+  }
+
+  .branch-box.voice-box .branch-step::before { color: var(--voice-green); }
+  .branch-box.text-box .branch-step::before { color: var(--text-blue); }
+
+  .branch-step strong { color: var(--text); font-weight: 600; }
+
+  /* --- THREE-WAY SPLIT (issue linking) --- */
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 8px 0;
+  }
+
+  .outcome-box {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: var(--surface-2);
+    text-align: center;
+  }
+
+  .outcome-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .outcome-desc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .outcome-box.match { border-color: var(--voice-green-border); }
+  .outcome-box.match .outcome-label { color: var(--voice-green); }
+
+  .outcome-box.new-issue { border-color: var(--issue-indigo-border); }
+  .outcome-box.new-issue .outcome-label { color: var(--issue-indigo); }
+
+  .outcome-box.review { border-color: var(--gate-amber-border); }
+  .outcome-box.review .outcome-label { color: var(--gate-amber); }
+
+  /* --- LOOKUP FAN-OUT --- */
+  .lookup-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 8px 0;
+  }
+
+  .lookup-item {
+    border: 1px solid var(--lookup-orange-border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: var(--lookup-orange-bg);
+  }
+
+  .lookup-item-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--lookup-orange);
+    margin-bottom: 6px;
+  }
+
+  .lookup-item-desc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* --- CONNECTORS --- */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 2px 0;
+  }
+
+  .connector-stem {
+    width: 2px;
+    background: var(--border-accent);
+    min-height: 20px;
+  }
+
+  .connector-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    padding: 3px 14px;
+    border-radius: 20px;
+    border: 1px solid;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0;
+  }
+
+  .connector-tag .arrow {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .connector-tag.route {
+    background: var(--enrich-teal-bg);
+    border-color: var(--enrich-teal-border);
+    color: var(--enrich-teal);
+  }
+
+  .connector-tag.converge {
+    background: var(--cleanse-purple-bg);
+    border-color: var(--cleanse-purple-border);
+    color: var(--cleanse-purple);
+  }
+
+  .connector-tag.pass {
+    background: var(--issue-indigo-bg);
+    border-color: var(--issue-indigo-border);
+    color: var(--issue-indigo);
+  }
+
+  .connector-tag.final {
+    background: var(--handoff-violet-bg);
+    border-color: var(--handoff-violet-border);
+    color: var(--handoff-violet);
+  }
+
+  /* --- LEGEND --- */
+  .legend {
+    max-width: 780px;
+    width: 100%;
+    margin-top: 48px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .legend-header {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .legend-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-dim);
+  }
+
+  /* --- SPEC REF --- */
+  .spec-refs {
+    max-width: 780px;
+    width: 100%;
+    margin-top: 36px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .spec-refs-header {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ref-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--surface-3);
+  }
+
+  .ref-section {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--issue-indigo);
+  }
+
+  .ref-desc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* --- VERSION TAG --- */
+  .version-tag {
+    margin-top: 48px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* --- ANIMATIONS --- */
+  .phase-card, .connector, .legend, .spec-refs {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .pipeline > :nth-child(1) { animation-delay: 0.1s; }
+  .pipeline > :nth-child(2) { animation-delay: 0.2s; }
+  .pipeline > :nth-child(3) { animation-delay: 0.3s; }
+  .pipeline > :nth-child(4) { animation-delay: 0.4s; }
+  .pipeline > :nth-child(5) { animation-delay: 0.5s; }
+  .pipeline > :nth-child(6) { animation-delay: 0.6s; }
+  .pipeline > :nth-child(7) { animation-delay: 0.7s; }
+
+  .legend { animation-delay: 0.85s; }
+  .spec-refs { animation-delay: 0.95s; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-label">Ingest Stage — Module Specification</div>
+    <h1>Smart Ingestion Pipeline</h1>
+    <p>interaction receipt → enrichment → issue linking → Customer Impact Discovery handoff</p>
+  </div>
+
+  <div class="pipeline">
+
+    <!-- ═══════════════ PHASE 1: INTAKE & GATING ═══════════════ -->
+    <div class="phase-card gating">
+      <div class="phase-number">Phase 1</div>
+      <div class="phase-title">Intake & Gating</div>
+      <div class="phase-subtitle">receive interaction → quality gates → bot detection → channel routing</div>
+      <div class="card-divider"></div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <span class="step-badge gate">Gate</span>
+          <span class="step-content"><strong>Processing Gate</strong> — Voice: &lt;2 parties OR ≤60s → skip. Text: &lt;2 parties OR ≤200 chars → skip.</span>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge gate">Gate</span>
+          <span class="step-content"><strong>Bot-only exchange?</strong> — Checks participant metadata. If yes → org config: <code>process_auto_agent_interactions?</code> (default: false → skip &amp; log <code>bot_only_exchange</code>)</span>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge skip">Skip</span>
+          <span class="step-content">Failed gates → store <code>skip_reason</code>, exit pipeline</span>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge gate">Route</span>
+          <span class="step-content"><strong>Channel Detection</strong> — routes to Voice, Chat, or Email processing path</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector">
+      <div class="connector-stem"></div>
+      <div class="connector-tag route"><span class="arrow">↓</span> Channel-specific processing</div>
+      <div class="connector-stem"></div>
+    </div>
+
+    <!-- ═══════════════ PHASE 2: CONTENT PROCESSING ═══════════════ -->
+    <div class="phase-card processing">
+      <div class="phase-number">Phase 2</div>
+      <div class="phase-title">Content Processing</div>
+      <div class="phase-subtitle">transcription / text cleaning → sentiment derivation → normalisation</div>
+      <div class="card-divider"></div>
+
+      <div class="branch-row">
+        <div class="branch-box voice-box">
+          <div class="branch-label voice-label">Voice Path</div>
+          <div class="branch-steps">
+            <div class="branch-step">Run <strong>transcription engine</strong></div>
+            <div class="branch-step"><strong>Audio formatting:</strong> language detection, punctuation restoration, speaker diarisation</div>
+            <div class="branch-step" style="color: var(--sentiment-pink);"><strong>Derive sentiment labels</strong></div>
+          </div>
+        </div>
+        <div class="branch-box text-box">
+          <div class="branch-label text-label">Text Path (Chat / Email)</div>
+          <div class="branch-steps">
+            <div class="branch-step"><strong>Strip &amp; clean:</strong> headers, disclaimers, signatures, bot phrases, emojis</div>
+            <div class="branch-step" style="color: var(--sentiment-pink);"><strong>Derive sentiment labels</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-steps" style="margin-top: 12px;">
+        <div class="flow-step">
+          <span class="step-badge sentiment">Signal</span>
+          <span class="step-content"><strong>Sentiment labels</strong> — <code>start_sentiment_label</code> + <code>end_sentiment_label</code> (negative | neutral | positive | null). Text classification, not full LLM. Feeds: <code>positive_sentiment_shift</code> (§4.4) and <code>sentiment_trajectory_multiplier</code> (AA §11.2).</span>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge cleanse">Clean</span>
+          <span class="step-content"><strong>Field cleansing &amp; normalisation</strong> — channel-agnostic from here. Flatten nested CRM/CCaaS metadata. Standardise timestamps, field labels, durations.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector">
+      <div class="connector-stem"></div>
+      <div class="connector-tag converge"><span class="arrow">↓</span> Paths converge — normalised content</div>
+      <div class="connector-stem"></div>
+    </div>
+
+    <!-- ═══════════════ PHASE 3: ENRICHMENT & CUSTOMER STATE ═══════════════ -->
+    <div class="phase-card enrichment">
+      <div class="phase-number">Phase 3</div>
+      <div class="phase-title">Enrichment & Customer State</div>
+      <div class="phase-subtitle">metadata injection → customer profile lookup → stream &amp; promotion resolution</div>
+      <div class="card-divider"></div>
+
+      <div class="flow-steps">
+        <div class="flow-step">
+          <span class="step-badge enrich">Meta</span>
+          <span class="step-content"><strong>Metadata injection</strong> — <code>interaction_id</code>, <code>agent_id</code>, queue, channel, timestamps</span>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge enrich">Class</span>
+          <span class="step-content"><strong>Classify</strong> <code>handling_mode</code> &amp; <code>bot_participation_flag</code></span>
+        </div>
+      </div>
+
+      <div class="flow-step" style="margin: 16px 0 8px;">
+        <span class="step-badge lookup">Lookup</span>
+        <span class="step-content"><strong>Resolve <code>customer_id</code></strong> — match inbound identifiers to Customer Profile Object</span>
+      </div>
+
+      <div class="branch-row" style="margin: 8px 0;">
+        <div class="branch-box" style="border-color: var(--voice-green-border); background: var(--voice-green-bg);">
+          <div class="branch-label voice-label">✓ Profile Found</div>
+          <div class="branch-steps">
+            <div class="branch-step"><strong>Load existing</strong> Customer Profile Object</div>
+            <div class="branch-step">Proceed to state retrieval below</div>
+          </div>
+        </div>
+        <div class="branch-box" style="border-color: var(--gate-amber-border); background: var(--gate-amber-bg);">
+          <div class="branch-label" style="color: var(--gate-amber);">⚑ No Profile Found</div>
+          <div class="branch-steps">
+            <div class="branch-step" style="color: var(--gate-amber);"><strong>Create new</strong> Customer Profile Object</div>
+            <div class="branch-step" style="color: var(--text-dim);">Initialise with available metadata (identifiers, channel, timestamps)</div>
+            <div class="branch-step" style="color: var(--text-dim);">Financial fields empty until CRM enrichment or first scoring pass</div>
+          </div>
+          <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--gate-amber-border); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gate-amber); font-style: italic;">New customers · first-time contacts · unmatched identifiers</div>
+        </div>
+      </div>
+
+      <div class="flow-step" style="margin: 12px 0 8px;">
+        <span class="step-badge lookup">Retrieve</span>
+        <span class="step-content"><strong>Customer state retrieval</strong> — pull from Customer Profile Object:</span>
+      </div>
+
+      <div class="lookup-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="lookup-item">
+          <div class="lookup-item-title">Interaction History</div>
+          <div class="lookup-item-desc">repeat_contact_count, activity within context_window</div>
+        </div>
+        <div class="lookup-item">
+          <div class="lookup-item-title">Financial Snapshot</div>
+          <div class="lookup-item-desc">CLTV, cltv_confidence, cost_to_serve</div>
+        </div>
+        <div class="lookup-item">
+          <div class="lookup-item-title">Open Issues</div>
+          <div class="lookup-item-desc">Customer + churn issues, status, categories, reason texts</div>
+        </div>
+        <div class="lookup-item">
+          <div class="lookup-item-title">Linked Streams</div>
+          <div class="lookup-item-desc">Previously assigned stream_id(s) from prior interactions — informs stream resolution</div>
+        </div>
+      </div>
+
+      <div class="flow-steps" style="margin-top: 12px;">
+        <div class="flow-step">
+          <span class="step-badge enrich">Resolve</span>
+          <span class="step-content"><strong>Stream &amp; Promotion Resolution</strong> — three-tier: metadata match → mapping rule → LLM inference. Set confidence scores &amp; assignment source.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector">
+      <div class="connector-stem"></div>
+      <div class="connector-tag pass"><span class="arrow">↓</span> Enriched interaction + customer state</div>
+      <div class="connector-stem"></div>
+    </div>
+
+    <!-- ═══════════════ PHASE 4: ISSUE LINKING & HANDOFF ═══════════════ -->
+    <div class="phase-card linking">
+      <div class="phase-number">Phase 4</div>
+      <div class="phase-title">Issue Linking & Handoff</div>
+      <div class="phase-subtitle">customer issue linking (Stage 1) → BEI snapshot → payload build → Customer Impact Discovery handoff</div>
+      <div class="card-divider"></div>
+
+      <div class="flow-step" style="margin-bottom: 12px;">
+        <span class="step-badge issue">Link</span>
+        <span class="step-content"><strong>Customer Issue Linking (Stage 1)</strong> — hybrid: rule-based + LLM tiebreaker. Uses <code>contact_subcategory</code>, <code>repeat_contact_subcategory</code>, reason text, open issue list. <em>Customer issues only — churn linking happens in Customer Impact Discovery (Stage 2).</em></span>
+      </div>
+
+      <div class="three-col">
+        <div class="outcome-box match">
+          <div class="outcome-label">✓ Match Found</div>
+          <div class="outcome-desc">Confidence ≥ threshold<br>Link to existing open customer issue → set <code>issue_id</code></div>
+        </div>
+        <div class="outcome-box new-issue">
+          <div class="outcome-label">+ New Issue</div>
+          <div class="outcome-desc">No match / new topic<br>Create Issue Object → set <code>issue_id</code></div>
+        </div>
+        <div class="outcome-box review">
+          <div class="outcome-label">⚑ Flag for Review</div>
+          <div class="outcome-desc">Below confidence threshold<br>Create new + flag<br><em>"over-create &gt; mis-link"</em></div>
+        </div>
+      </div>
+
+      <div class="flow-steps" style="margin-top: 14px;">
+        <div class="flow-step">
+          <span class="step-badge bei">Snapshot</span>
+          <span class="step-content"><strong>Capture <code>bei_previous</code></strong> from Customer Profile — frozen before downstream processing. Critical for delta computation in revenue attribution.</span>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge output">Build</span>
+          <span class="step-content"><strong>Build normalised payload</strong> — enriched interaction + <code>issue_id</code> (nullable) + <code>bei_previous</code></span>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge output">Store</span>
+          <span class="step-content">Store to validated storage + emit downstream flags</span>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge handoff">Handoff</span>
+          <span class="step-content"><strong>Route to Customer Impact Discovery</strong> — payload includes: normalised transcript, sentiment labels, customer state, issue_id, bei_previous, stream config</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════ LEGEND ═══════════════ -->
+  <div class="legend">
+    <div class="legend-header">Colour Legend</div>
+    <div class="legend-grid">
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--gate-amber);"></div>
+        <div class="legend-text">Decision gates</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--skip-red);"></div>
+        <div class="legend-text">Skip / reject paths</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--voice-green);"></div>
+        <div class="legend-text">Voice processing</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--text-blue);"></div>
+        <div class="legend-text">Text processing</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--sentiment-pink);"></div>
+        <div class="legend-text">Sentiment derivation</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--cleanse-purple);"></div>
+        <div class="legend-text">Cleansing &amp; normalisation</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--enrich-teal);"></div>
+        <div class="legend-text">Enrichment &amp; resolution</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--lookup-orange);"></div>
+        <div class="legend-text">Customer profile lookup</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--issue-indigo);"></div>
+        <div class="legend-text">Issue linking</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--bei-gold);"></div>
+        <div class="legend-text">BEI state capture</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--output-brown);"></div>
+        <div class="legend-text">Output / storage</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--handoff-violet);"></div>
+        <div class="legend-text">Customer Impact Discovery handoff</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SPEC REFERENCES ═══════════════ -->
+  <div class="spec-refs">
+    <div class="spec-refs-header">Specification References</div>
+    <div class="ref-row"><div class="ref-section">§9.1–2</div><div class="ref-desc">Receive, normalise, enrich interaction data</div></div>
+    <div class="ref-row"><div class="ref-section">§2.1</div><div class="ref-desc">Sentiment label derivation (Smart Ingestion, pre-Customer Impact Discovery)</div></div>
+    <div class="ref-row"><div class="ref-section">§9.4</div><div class="ref-desc">Customer profile + open issues retrieval</div></div>
+    <div class="ref-row"><div class="ref-section">§3.3–3.4</div><div class="ref-desc">Customer issue linking — Stage 1 (hybrid rule-based + LLM)</div></div>
+    <div class="ref-row"><div class="ref-section">§6.4</div><div class="ref-desc">BEI snapshot (bei_previous) before downstream writes</div></div>
+    <div class="ref-row"><div class="ref-section">§9.5–6</div><div class="ref-desc">Issue linking output + BEI snapshot</div></div>
+    <div class="ref-row"><div class="ref-section">§1.6</div><div class="ref-desc">Context window — governs repeat count, abandonment, modifier staleness</div></div>
+  </div>
+
+  <div class="version-tag">smart-ingestion-spec · 18 Feb 2026</div>
+
+</body>
+</html>
