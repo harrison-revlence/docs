@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revlence — Four-Object Model</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf9f7;
+    --surface-1: #ffffff;
+    --surface-2: #f5f3f0;
+    --border: #e0dbd4;
+    --border-accent: #c8c1b8;
+    --text: #1a1814;
+    --text-dim: #5c564d;
+    --text-muted: #8a847a;
+    --accent-blue: #2b6cb0;
+    --accent-cyan: #0e7c6b;
+    --accent-orange: #c05621;
+    --accent-purple: #6b46c1;
+    --accent-green: #2f855a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 48px 24px 64px;
+  }
+
+  .page-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .header-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    margin-bottom: 12px;
+  }
+
+  .header h1 { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+  .header p { color: var(--text-muted); margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  /* --- DIAGRAM AREA --- */
+  .diagram-area {
+    position: relative;
+    width: 100%;
+  }
+
+  .scoring-pipeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 600px;
+    width: 60%;
+  }
+
+  /* Stream card absolutely positioned by JS */
+  .stream-card {
+    position: absolute;
+    width: 210px;
+    border: 1.5px solid rgba(47, 133, 90, 0.3);
+    border-radius: 12px;
+    padding: 28px 32px;
+    background: var(--surface-1);
+    box-shadow: 0 2px 20px rgba(47, 133, 90, 0.05);
+    transition: border-color 0.3s ease;
+    z-index: 1;
+  }
+  .stream-card:hover { border-color: rgba(47, 133, 90, 0.5); }
+  .stream-card .card-title { color: var(--accent-green); font-size: 14px; letter-spacing: 1.5px; }
+  .stream-card .card-subtitle { margin-bottom: 20px; }
+  .stream-fields { display: flex; flex-direction: column; gap: 6px; }
+  .stream-field { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); line-height: 1.65; }
+
+  /* SVG overlay for brace + pill */
+  .brace-svg {
+    position: absolute;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: visible;
+  }
+
+  /* --- OBJECT CARDS --- */
+  .object-card {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    background: var(--surface-1);
+    transition: border-color 0.3s ease;
+  }
+  .object-card:hover { border-color: var(--border-accent); }
+
+  .object-card.customer-profile { border-color: rgba(43, 108, 176, 0.3); box-shadow: 0 2px 20px rgba(43, 108, 176, 0.05); }
+  .object-card.interaction-object { border-color: rgba(192, 86, 33, 0.3); box-shadow: 0 2px 20px rgba(192, 86, 33, 0.05); }
+  .object-card.issue-object { border-color: rgba(14, 124, 107, 0.3); box-shadow: 0 2px 20px rgba(14, 124, 107, 0.05); }
+
+  .card-title { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+  .customer-profile .card-title { color: var(--accent-blue); }
+  .interaction-object .card-title { color: var(--accent-orange); }
+  .issue-object .card-title { color: var(--accent-cyan); }
+
+  .card-subtitle { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); margin-bottom: 20px; font-style: italic; }
+  .card-divider { height: 1px; background: var(--border); margin-bottom: 18px; }
+
+  /* --- CUSTOMER PROFILE SUB-CARDS --- */
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .profile-sub-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; }
+  .sub-card-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--accent-orange); letter-spacing: 0.5px; margin-bottom: 6px; }
+  .sub-card-body { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); line-height: 1.65; }
+
+  /* --- INTERACTION PHASES --- */
+  .phases { display: flex; flex-direction: column; gap: 14px; }
+  .phase { display: flex; gap: 12px; align-items: flex-start; }
+  .phase-badge { flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px; margin-top: 1px; white-space: nowrap; }
+  .phase-badge.read { background: rgba(43, 108, 176, 0.12); color: var(--accent-blue); }
+  .phase-badge.compute { background: rgba(107, 70, 193, 0.12); color: var(--accent-purple); }
+  .phase-badge.write { background: rgba(192, 86, 33, 0.12); color: var(--accent-orange); }
+  .phase-badge.compute2 { background: rgba(14, 124, 107, 0.12); color: var(--accent-cyan); }
+  .phase-content { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); line-height: 1.65; }
+  .phase-content strong { color: var(--text); font-weight: 600; }
+
+  /* --- ISSUE OBJECT --- */
+  .issue-description { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); line-height: 1.65; margin-bottom: 14px; }
+  .issue-description em { color: var(--text-muted); font-style: normal; }
+  .issue-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .issue-list li { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); line-height: 1.55; padding-left: 16px; position: relative; }
+  .issue-list li::before { content: '—'; position: absolute; left: 0; color: var(--accent-cyan); font-weight: 600; }
+
+  /* --- VERTICAL CONNECTORS --- */
+  .connector-group { display: flex; align-items: center; gap: 16px; padding: 4px 0; }
+  .connector-stem { width: 2px; background: var(--border-accent); align-self: stretch; min-height: 48px; }
+  .connector-tags { display: flex; flex-direction: column; gap: 6px; padding: 8px 0; }
+  .connector-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.8px; padding: 4px 14px; border-radius: 20px; border: 1.5px solid;
+    white-space: nowrap; display: flex; align-items: center; gap: 6px;
+  }
+  .connector-tag.reads { background: rgba(43, 108, 176, 0.06); border-color: rgba(43, 108, 176, 0.3); color: var(--accent-blue); }
+  .connector-tag.writes { background: rgba(192, 86, 33, 0.06); border-color: rgba(192, 86, 33, 0.3); color: var(--accent-orange); }
+  .connector-tag.updates { background: rgba(14, 124, 107, 0.06); border-color: rgba(14, 124, 107, 0.3); color: var(--accent-cyan); }
+  .connector-tag .arrow { font-size: 13px; line-height: 1; }
+
+  .connector-simple { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 2px 0; }
+  .connector-simple .connector-stem { min-height: 14px; }
+  .connector-simple .connector-tag { margin: 6px 0; }
+
+  /* --- RELATIONSHIPS SECTION --- */
+  .relationships { max-width: 700px; width: 100%; margin-top: 48px; }
+  .relationships-header { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--accent-purple); margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .rel-card { border: 1.5px solid var(--border); border-radius: 10px; padding: 22px 28px; margin-bottom: 16px; background: var(--surface-1); transition: border-color 0.3s ease; }
+  .rel-card:hover { border-color: var(--border-accent); }
+  .rel-card-title { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+  .rel-card-title .rel-from { color: var(--accent-orange); }
+  .rel-card-title .rel-arrow { color: var(--text-muted); font-size: 14px; }
+  .rel-card-title .rel-to-issue { color: var(--accent-cyan); }
+  .rel-card-title .rel-to-customer { color: var(--accent-blue); }
+  .rel-card-title .rel-to-stream { color: var(--accent-green); }
+  .rel-card-title .rel-all { color: var(--accent-purple); }
+  .rel-card-body { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text-dim); line-height: 1.75; }
+  .rel-card-body code { font-size: 11px; color: var(--text); background: var(--surface-2); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); }
+  .rel-card-body .highlight-orange { color: var(--accent-orange); }
+  .rel-card-body .highlight-cyan { color: var(--accent-cyan); }
+  .rel-card-body .highlight-blue { color: var(--accent-blue); }
+  .rel-card-body .highlight-green { color: var(--accent-green); }
+  .rel-detail { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--text-muted); line-height: 1.7; }
+  .rel-detail strong { color: var(--text-dim); font-weight: 600; }
+
+  .version-tag { margin-top: 48px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 1px; text-align: center; }
+
+  /* --- ANIMATIONS --- */
+  .object-card, .connector-group, .connector-simple, .rel-card, .stream-card {
+    opacity: 0; transform: translateY(16px); animation: fadeUp 0.5s ease forwards;
+  }
+  .scoring-pipeline > :nth-child(1) { animation-delay: 0.1s; }
+  .scoring-pipeline > :nth-child(2) { animation-delay: 0.25s; }
+  .scoring-pipeline > :nth-child(3) { animation-delay: 0.4s; }
+  .scoring-pipeline > :nth-child(4) { animation-delay: 0.55s; }
+  .scoring-pipeline > :nth-child(5) { animation-delay: 0.7s; }
+  .stream-card { animation-delay: 0.5s; }
+  .brace-svg { opacity: 0; animation: fadeIn 0.5s ease 0.85s forwards; }
+  .relationships-header { opacity: 0; animation: fadeUp 0.5s ease 0.95s forwards; }
+  .relationships .rel-card:nth-child(2) { animation-delay: 1.05s; }
+  .relationships .rel-card:nth-child(3) { animation-delay: 1.15s; }
+  .relationships .rel-card:nth-child(4) { animation-delay: 1.25s; }
+  .relationships .rel-card:nth-child(5) { animation-delay: 1.35s; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { to { opacity: 1; } }
+</style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <div class="header">
+      <div class="header-label">§1.3 — Scoring Architecture</div>
+      <h1>The Four-Object Model</h1>
+      <p>explicit read / write / reference relationships</p>
+    </div>
+
+    <div class="diagram-area" id="diagramArea">
+
+      <div class="scoring-pipeline">
+        <!-- CUSTOMER PROFILE OBJECT -->
+        <div class="object-card customer-profile" id="cardCustomer">
+          <div class="card-title">Customer Profile Object</div>
+          <div class="card-subtitle">(persistent system of record)</div>
+          <div class="card-divider"></div>
+          <div class="profile-grid">
+            <div class="profile-sub-card"><div class="sub-card-title">Identity</div><div class="sub-card-body">Customer ID, metadata</div></div>
+            <div class="profile-sub-card"><div class="sub-card-title">Streams</div><div class="sub-card-body">Streams, Promotions, SLTV</div></div>
+            <div class="profile-sub-card"><div class="sub-card-title">State &amp; Scoring</div><div class="sub-card-body">Friction, Risk, BEI, Churn (Optional)</div></div>
+            <div class="profile-sub-card"><div class="sub-card-title">Financial Data</div><div class="sub-card-body">CLTV, Cost to Serve</div></div>
+            <div class="profile-sub-card"><div class="sub-card-title">Issues</div><div class="sub-card-body">Customer Issues, Churn Issues</div></div>
+            <div class="profile-sub-card"><div class="sub-card-title">Interaction History</div><div class="sub-card-body">Interactions, Repeat Contact Counts, Activity within Context Window</div></div>
+          </div>
+        </div>
+
+        <!-- CONNECTOR: READS / WRITES -->
+        <div class="connector-group">
+          <div class="connector-stem"></div>
+          <div class="connector-tags">
+            <div class="connector-tag reads"><span class="arrow">↓</span> READS (previous state)</div>
+            <div class="connector-tag writes"><span class="arrow">↑</span> WRITES (updated state)</div>
+          </div>
+        </div>
+
+        <!-- INTERACTION OBJECT -->
+        <div class="object-card interaction-object" id="cardInteraction">
+          <div class="card-title">Interaction Object</div>
+          <div class="card-subtitle">(ephemeral transformation event)</div>
+          <div class="card-divider"></div>
+          <div class="phases">
+            <div class="phase"><span class="phase-badge read">Phase 1</span><span class="phase-content"><strong>READ</strong> customer state (previous BEI, friction, modifiers, churn intent, open issues)</span></div>
+            <div class="phase"><span class="phase-badge compute">Phase 2</span><span class="phase-content"><strong>COMPUTE</strong> interaction scores (CID, CFS, risk modifiers, churn intent if applicable)</span></div>
+            <div class="phase"><span class="phase-badge write">Phase 3</span><span class="phase-content"><strong>WRITE</strong> updated customer profiles (aggregate friction, update modifiers, recompute BEI)</span></div>
+            <div class="phase"><span class="phase-badge compute2">Phase 4</span><span class="phase-content"><strong>COMPUTE</strong> deltas + revenue (BEI delta → revenue_protected, churn events → revenue_saved/lost)</span></div>
+          </div>
+        </div>
+
+        <!-- CONNECTOR: UPDATES -->
+        <div class="connector-simple">
+          <div class="connector-stem"></div>
+          <div class="connector-tag updates"><span class="arrow">↓</span> UPDATES</div>
+          <div class="connector-stem"></div>
+        </div>
+
+        <!-- ISSUE OBJECT -->
+        <div class="object-card issue-object" id="cardIssue">
+          <div class="card-title">Issue Object</div>
+          <div class="card-subtitle">(groups interactions by problem)</div>
+          <div class="card-divider"></div>
+          <div class="issue-description">Sits between Interaction and Customer Profile.<br><em>NOT</em> a ticketing system — just enough structure to:</div>
+          <ul class="issue-list">
+            <li>Group interactions about the same problem</li>
+            <li>Track issue lifecycle (open → resolved → abandoned)</li>
+            <li>Detect false resolutions</li>
+            <li>Trigger BEI decay floor on resolution events</li>
+            <li>Track churn conversations as churn-typed issues</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- STREAM OBJECT — absolutely positioned by JS -->
+      <div class="stream-card" id="cardStream">
+        <div class="card-title">Stream Object</div>
+        <div class="card-subtitle">(revenue stream / product)</div>
+        <div class="card-divider"></div>
+        <div class="stream-fields">
+          <div class="stream-field">Stream identity</div>
+          <div class="stream-field">Owner</div>
+          <div class="stream-field">Promotions</div>
+          <div class="stream-field">SLTV</div>
+          <div class="stream-field">Customer associations</div>
+          <div class="stream-field">Issue associations</div>
+        </div>
+      </div>
+
+      <!-- SVG brace + pill drawn by JS -->
+      <svg class="brace-svg" id="braceSvg"></svg>
+
+    </div>
+
+    <!-- RELATIONSHIPS -->
+    <div class="relationships">
+      <div class="relationships-header">Relationships</div>
+
+      <div class="rel-card">
+        <div class="rel-card-title"><span class="rel-from">Interaction</span><span class="rel-arrow">→</span><span class="rel-to-issue">Issue</span></div>
+        <div class="rel-card-body">
+          Each interaction is linked to a primary issue via <code>issue_id</code> — either a
+          <span class="highlight-cyan">service issue</span> or a <span class="highlight-cyan">churn issue</span>.
+          When the interaction touches a second issue, it is also linked via <code>linked_issue_id</code>.
+          <div class="rel-detail"><strong>Linking stages:</strong> Service issues linked during <span class="highlight-blue">Smart Ingestion</span>; churn issues linked during <span class="highlight-orange">Customer Impact Discovery</span> after LLM extraction.</div>
+        </div>
+      </div>
+
+      <div class="rel-card">
+        <div class="rel-card-title"><span class="rel-to-issue">Issue</span><span class="rel-arrow">→</span><span class="rel-to-customer">Customer Profile</span></div>
+        <div class="rel-card-body">Issues are owned by the customer. Issue-level friction (<span class="highlight-cyan">mean CFS per issue</span>, summed across issues) is a <span class="highlight-blue">BEI input</span>.</div>
+      </div>
+
+      <div class="rel-card">
+        <div class="rel-card-title"><span class="rel-from">Interaction</span><span class="rel-arrow">→</span><span class="rel-to-customer">Customer Profile</span></div>
+        <div class="rel-card-body">Reads current state before scoring, writes updated state after. <span class="highlight-blue">BEI delta</span> drives <span class="highlight-orange">revenue attribution</span>.</div>
+      </div>
+
+      <div class="rel-card">
+        <div class="rel-card-title"><span class="rel-all">All Objects</span><span class="rel-arrow">→</span><span class="rel-to-stream">Stream</span><span style="font-size:11px; color:var(--text-muted); font-weight:400; margin-left:4px;">(reference)</span></div>
+        <div class="rel-card-body">
+          All three scoring objects <strong>reference</strong> the Stream Object.
+          <span class="highlight-blue">Customer Profiles</span> are assigned to streams (with promotions and SLTV).
+          <span class="highlight-orange">Interactions</span> are resolved to a stream during Smart Ingestion via three-tier resolution (metadata match → mapping rule → LLM inference).
+          <span class="highlight-cyan">Issues</span> can be multi-stream or unassigned.
+          <div class="rel-detail">Streams represent <strong>revenue-generating products or services</strong> — the business segmentation layer that connects customers, issues, and financial data. Downstream, streams link to <span class="highlight-green">Initiatives</span> (outside the scoring pipeline).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="version-tag">revenue-risk-spec-clean-v4 · Four-Object Model · 18 Feb 2026</div>
+  </div>
+
+<script>
+function layout() {
+  const area = document.getElementById('diagramArea');
+  const svg  = document.getElementById('braceSvg');
+  const cC   = document.getElementById('cardCustomer');
+  const cI   = document.getElementById('cardInteraction');
+  const cIs  = document.getElementById('cardIssue');
+  const cS   = document.getElementById('cardStream');
+
+  const aR = area.getBoundingClientRect();
+
+  // Helper: get element bounds relative to diagram-area
+  const rel = (el) => {
+    const r = el.getBoundingClientRect();
+    return {
+      top: r.top - aR.top, bottom: r.bottom - aR.top,
+      left: r.left - aR.left, right: r.right - aR.left,
+      midY: r.top + r.height / 2 - aR.top,
+      w: r.width, h: r.height
+    };
+  };
+
+  const rC  = rel(cC);
+  const rI  = rel(cI);
+  const rIs = rel(cIs);
+
+  // --- Horizontal layout plan (left to right) ---
+  //
+  // pipeline cards | 16px | brace arms (30px) | brace curves to tip |
+  // 6px | stem | 8px | pill | 8px | stem | 6px | Stream card
+  //
+  const pipeRight = rC.right;
+
+  // Brace geometry
+  const braceGap   = 16;   // gap between card edge and brace start
+  const braceWidth = 30;   // horizontal arm length
+  const cr         = 12;   // corner radius for curves
+
+  const xBraceStart = pipeRight + braceGap;
+  const xSpine      = xBraceStart + braceWidth;
+  const xTip        = xSpine + cr;  // rightmost point of } curves
+
+  // Pill dimensions
+  const pillW = 134;
+  const pillH = 28;
+  const pillR = 14;
+
+  // Gaps between elements
+  const tinyGap = 6;
+  const stemPillGap = 8;
+
+  // Calculate where Stream card should go (work rightward from tip)
+  // tip → tinyGap → stem(20px min) → stemPillGap → pill → stemPillGap → stem(20px min) → tinyGap → stream
+  const minStem = 14;
+  const streamLeft = xTip + tinyGap + minStem + stemPillGap + pillW + stemPillGap + minStem + tinyGap;
+
+  // Position Stream card — vertically centered on Interaction, same height
+  const interactionHeight = cI.offsetHeight;
+  const streamTopY = rI.midY - interactionHeight / 2;
+  cS.style.left = streamLeft + 'px';
+  cS.style.top  = Math.max(0, streamTopY) + 'px';
+  cS.style.height = interactionHeight + 'px';
+
+  const rS = rel(cS);
+
+  // Ensure diagram area is tall enough
+  const maxBottom = Math.max(rIs.bottom, rS.bottom) + 20;
+  area.style.minHeight = maxBottom + 'px';
+
+  // --- Vertical positions ---
+  const yTop = rC.midY;
+  const yMid = rI.midY;
+  const yBot = rIs.midY;
+
+  // --- Connector segment positions ---
+  const xStemLeftStart  = xTip + tinyGap;
+  const xPillCx         = xTip + tinyGap + minStem + stemPillGap + pillW / 2;
+  const xPillL          = xPillCx - pillW / 2;
+  const xPillR          = xPillCx + pillW / 2;
+  const xStemLeftEnd    = xPillL - stemPillGap;
+  const xStemRightStart = xPillR + stemPillGap;
+  const xStemRightEnd   = rS.left - tinyGap;
+
+  // --- SVG size ---
+  svg.setAttribute('width', aR.width);
+  svg.setAttribute('height', maxBottom);
+  svg.style.width  = aR.width + 'px';
+  svg.style.height = maxBottom + 'px';
+
+  // --- Brace } shape ---
+  // Top arm: horizontal → curve down → vertical → curve right to tip
+  const topArm = [
+    `M ${xBraceStart} ${yTop}`,
+    `L ${xSpine - cr} ${yTop}`,
+    `Q ${xSpine} ${yTop}, ${xSpine} ${yTop + cr}`,
+    `L ${xSpine} ${yMid - cr}`,
+    `Q ${xSpine} ${yMid}, ${xTip} ${yMid}`
+  ].join(' ');
+
+  // Bottom arm: tip → curve down → vertical → curve right → horizontal
+  const botArm = [
+    `M ${xTip} ${yMid}`,
+    `Q ${xSpine} ${yMid}, ${xSpine} ${yMid + cr}`,
+    `L ${xSpine} ${yBot - cr}`,
+    `Q ${xSpine} ${yBot}, ${xSpine - cr} ${yBot}`,
+    `L ${xBraceStart} ${yBot}`
+  ].join(' ');
+
+  // Middle arm: dashed line from pipeline edge to spine (NOT to tip)
+  const midArm = `M ${xBraceStart} ${yMid} L ${xSpine} ${yMid}`;
+
+  // Connector stems (like the vertical stems in READS/WRITES but horizontal)
+  const stemLeft  = `M ${xStemLeftStart} ${yMid} L ${xStemLeftEnd} ${yMid}`;
+  const stemRight = `M ${xStemRightStart} ${yMid} L ${xStemRightEnd} ${yMid}`;
+
+  // --- Colors ---
+  const g   = '#2f855a';
+  const gL  = 'rgba(47, 133, 90, 0.35)';
+  const gBg = 'rgba(47, 133, 90, 0.06)';
+  const gBd = 'rgba(47, 133, 90, 0.3)';
+
+  svg.innerHTML = `
+    <!-- Brace } shape -->
+    <path d="${topArm}" fill="none" stroke="${gL}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${botArm}" fill="none" stroke="${gL}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${midArm}" fill="none" stroke="${gL}" stroke-width="2" stroke-dasharray="4 4"/>
+
+    <!-- Connector stems (gap → stem → gap → pill → gap → stem → gap) -->
+    <path d="${stemLeft}" fill="none" stroke="${gL}" stroke-width="2"/>
+    <path d="${stemRight}" fill="none" stroke="${gL}" stroke-width="2"/>
+
+    <!-- REFERENCES pill -->
+    <rect x="${xPillL}" y="${yMid - pillH/2}" width="${pillW}" height="${pillH}"
+      rx="${pillR}" ry="${pillR}" fill="${gBg}" stroke="${gBd}" stroke-width="1.5"/>
+    <text x="${xPillCx}" y="${yMid + 1}" text-anchor="middle" dominant-baseline="central"
+      font-family="'JetBrains Mono', monospace" font-weight="600"
+      letter-spacing="0.8" fill="${g}"><tspan font-size="10.5">REFERENCES </tspan><tspan font-size="14" dy="0.5">→</tspan></text>
+  `;
+}
+
+window.addEventListener('load', () => setTimeout(layout, 550));
+window.addEventListener('resize', layout);
+</script>
+</body>
+</html>
