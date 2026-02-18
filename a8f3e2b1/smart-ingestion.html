@@ -50,9 +50,9 @@
     --lookup-orange-bg: rgba(230, 81, 0, 0.06);
     --lookup-orange-border: rgba(230, 81, 0, 0.18);
 
-    --issue-indigo: #283593;
-    --issue-indigo-bg: rgba(40, 53, 147, 0.06);
-    --issue-indigo-border: rgba(40, 53, 147, 0.18);
+    --issue-indigo: #015cde;
+    --issue-indigo-bg: rgba(1, 92, 222, 0.06);
+    --issue-indigo-border: rgba(1, 92, 222, 0.18);
 
     --bei-gold: #f57f17;
     --bei-gold-bg: rgba(245, 127, 23, 0.08);
@@ -62,9 +62,9 @@
     --output-brown-bg: rgba(78, 52, 46, 0.05);
     --output-brown-border: rgba(78, 52, 46, 0.15);
 
-    --handoff-violet: #6a1b9a;
-    --handoff-violet-bg: rgba(106, 27, 154, 0.08);
-    --handoff-violet-border: rgba(106, 27, 154, 0.22);
+    --handoff-violet: #7341ff;
+    --handoff-violet-bg: rgba(115, 65, 255, 0.08);
+    --handoff-violet-border: rgba(115, 65, 255, 0.22);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -283,7 +283,7 @@
   .step-badge.issue { background: var(--issue-indigo-bg); border-color: var(--issue-indigo-border); color: var(--issue-indigo); }
   .step-badge.bei { background: var(--bei-gold-bg); border-color: var(--bei-gold-border); color: var(--bei-gold); }
   .step-badge.output { background: var(--output-brown-bg); border-color: var(--output-brown-border); color: var(--output-brown); }
-  .step-badge.handoff { background: var(--handoff-violet-bg); border-color: var(--handoff-violet-border); color: var(--handoff-violet); }
+  .step-badge.handoff { background: var(--issue-indigo-bg); border-color: var(--issue-indigo-border); color: var(--issue-indigo); }
 
   /* --- BRANCH CONTAINER --- */
   .branch-row {
@@ -600,9 +600,9 @@
 <body>
 
   <div class="header">
-    <div class="header-label">Ingest Stage — Module Specification</div>
+    <div class="header-label" style="color: #015cde;">Stage: Ingest</div>
     <h1>Smart Ingestion Pipeline</h1>
-    <p>interaction receipt → enrichment → issue linking → Customer Impact Discovery handoff</p>
+    <p>interaction receipt → enrichment → customer state → handoff</p>
   </div>
 
   <div class="pipeline">
@@ -627,7 +627,7 @@
           <span class="step-content">Failed gates → store <code>skip_reason</code>, exit pipeline</span>
         </div>
         <div class="flow-step">
-          <span class="step-badge gate">Route</span>
+          <span class="step-badge handoff">Route</span>
           <span class="step-content"><strong>Channel Detection</strong> — routes to Voice, Chat, or Email processing path</span>
         </div>
       </div>
@@ -643,7 +643,7 @@
     <div class="phase-card processing">
       <div class="phase-number">Phase 2</div>
       <div class="phase-title">Content Processing</div>
-      <div class="phase-subtitle">transcription / text cleaning → sentiment derivation → normalisation</div>
+      <div class="phase-subtitle">transcription / text cleaning → sentiment → classification → normalisation</div>
       <div class="card-divider"></div>
 
       <div class="branch-row">
@@ -652,14 +652,12 @@
           <div class="branch-steps">
             <div class="branch-step">Run <strong>transcription engine</strong></div>
             <div class="branch-step"><strong>Audio formatting:</strong> language detection, punctuation restoration, speaker diarisation</div>
-            <div class="branch-step" style="color: var(--sentiment-pink);"><strong>Derive sentiment labels</strong></div>
           </div>
         </div>
         <div class="branch-box text-box">
           <div class="branch-label text-label">Text Path (Chat / Email)</div>
           <div class="branch-steps">
             <div class="branch-step"><strong>Strip &amp; clean:</strong> headers, disclaimers, signatures, bot phrases, emojis</div>
-            <div class="branch-step" style="color: var(--sentiment-pink);"><strong>Derive sentiment labels</strong></div>
           </div>
         </div>
       </div>
@@ -670,39 +668,61 @@
           <span class="step-content"><strong>Sentiment labels</strong> — <code>start_sentiment_label</code> + <code>end_sentiment_label</code> (negative | neutral | positive | null). Text classification, not full LLM. Feeds: <code>positive_sentiment_shift</code> (§4.4) and <code>sentiment_trajectory_multiplier</code> (AA §11.2).</span>
         </div>
         <div class="flow-step">
-          <span class="step-badge cleanse">Clean</span>
-          <span class="step-content"><strong>Field cleansing &amp; normalisation</strong> — channel-agnostic from here. Flatten nested CRM/CCaaS metadata. Standardise timestamps, field labels, durations.</span>
+          <span class="step-badge enrich">Class</span>
+          <span class="step-content"><strong>Classify</strong> <code>handling_mode</code> &amp; <code>bot_participation_flag</code></span>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge cleanse">Normalise</span>
+          <span class="step-content"><strong>Customer metadata normalisation</strong> — stitch identity and context across CCaaS/recording, CRM, ticketing, digital events into unified customer metadata. Provides clean identifiers for customer_id resolution and clean product metadata for stream matching.</span>
         </div>
       </div>
     </div>
 
     <div class="connector">
       <div class="connector-stem"></div>
-      <div class="connector-tag converge"><span class="arrow">↓</span> Paths converge — normalised content</div>
+      <div class="connector-tag converge"><span class="arrow">↓</span> Normalised content + customer metadata</div>
       <div class="connector-stem"></div>
     </div>
 
-    <!-- ═══════════════ PHASE 3: ENRICHMENT & CUSTOMER STATE ═══════════════ -->
+    <!-- ═══════════════ PHASE 3: CUSTOMER STATE & STREAM ATTRIBUTION ═══════════════ -->
     <div class="phase-card enrichment">
       <div class="phase-number">Phase 3</div>
-      <div class="phase-title">Enrichment & Customer State</div>
-      <div class="phase-subtitle">metadata injection → customer profile lookup → stream &amp; promotion resolution</div>
+      <div class="phase-title">Customer State & Stream Attribution</div>
+      <div class="phase-subtitle">stream resolution (Tiers 1–2) → customer profile lookup → state retrieval</div>
       <div class="card-divider"></div>
 
-      <div class="flow-steps">
-        <div class="flow-step">
-          <span class="step-badge enrich">Meta</span>
-          <span class="step-content"><strong>Metadata injection</strong> — <code>interaction_id</code>, <code>agent_id</code>, queue, channel, timestamps</span>
+      <div class="flow-step" style="margin: 0 0 8px;">
+        <span class="step-badge enrich">Resolve</span>
+        <span class="step-content"><strong>Stream Attribution (Tiers 1–2)</strong> — attempt deterministic stream resolution from normalised interaction metadata:</span>
+      </div>
+
+      <div style="border: 1px solid var(--enrich-teal-border); border-radius: 10px; padding: 20px 24px; background: var(--enrich-teal-bg); margin: 4px 0 16px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--enrich-teal); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--enrich-teal-border);">Smart Ingestion — Deterministic Resolution</div>
+        <div class="branch-row" style="margin: 0;">
+          <div class="branch-box" style="border-color: var(--enrich-teal-border); background: rgba(94, 234, 212, 0.04); flex: 1;">
+            <div class="branch-label" style="color: var(--enrich-teal);">Tier 1: Metadata Match</div>
+            <div class="branch-steps">
+              <div class="branch-step">Normalised interaction metadata explicitly identifies the product/stream</div>
+              <div class="branch-step" style="color: var(--text-dim);">e.g., CRM metadata says "credit card product"</div>
+            </div>
+          </div>
+          <div class="branch-box" style="border-color: var(--enrich-teal-border); background: rgba(94, 234, 212, 0.04); flex: 1;">
+            <div class="branch-label" style="color: var(--enrich-teal);">Tier 2: Mapping Rules</div>
+            <div class="branch-steps">
+              <div class="branch-step">No explicit metadata — apply configured rules</div>
+              <div class="branch-step" style="color: var(--text-dim);">e.g., if <code>queue_id = credit_card</code> → Credit Card Stream</div>
+            </div>
+          </div>
         </div>
-        <div class="flow-step">
-          <span class="step-badge enrich">Class</span>
-          <span class="step-content"><strong>Classify</strong> <code>handling_mode</code> &amp; <code>bot_participation_flag</code></span>
+        <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--enrich-teal-border);">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--voice-green);">✓ Resolved → set <code>stream_id</code>, confidence score &amp; assignment source</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gate-amber); margin-top: 4px;">⚑ Unresolved → <code>stream_id</code> null, deferred to Customer Impact Discovery (Tiers 3–4)</div>
         </div>
       </div>
 
-      <div class="flow-step" style="margin: 16px 0 8px;">
+      <div class="flow-step" style="margin: 0 0 8px;">
         <span class="step-badge lookup">Lookup</span>
-        <span class="step-content"><strong>Resolve <code>customer_id</code></strong> — match inbound identifiers to Customer Profile Object</span>
+        <span class="step-content"><strong>Resolve <code>customer_id</code></strong> — match normalised identifiers to Customer Profile Object</span>
       </div>
 
       <div class="branch-row" style="margin: 8px 0;">
@@ -710,7 +730,7 @@
           <div class="branch-label voice-label">✓ Profile Found</div>
           <div class="branch-steps">
             <div class="branch-step"><strong>Load existing</strong> Customer Profile Object</div>
-            <div class="branch-step">Proceed to state retrieval below</div>
+            <div class="branch-step">Retrieve state across all six domains below</div>
           </div>
         </div>
         <div class="branch-box" style="border-color: var(--gate-amber-border); background: var(--gate-amber-bg);">
@@ -718,7 +738,7 @@
           <div class="branch-steps">
             <div class="branch-step" style="color: var(--gate-amber);"><strong>Create new</strong> Customer Profile Object</div>
             <div class="branch-step" style="color: var(--text-dim);">Initialise with available metadata (identifiers, channel, timestamps)</div>
-            <div class="branch-step" style="color: var(--text-dim);">Financial fields empty until CRM enrichment or first scoring pass</div>
+            <div class="branch-step" style="color: var(--text-dim);">State, scoring, financial, issues, history all empty/default</div>
           </div>
           <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--gate-amber-border); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gate-amber); font-style: italic;">New customers · first-time contacts · unmatched identifiers</div>
         </div>
@@ -729,74 +749,56 @@
         <span class="step-content"><strong>Customer state retrieval</strong> — pull from Customer Profile Object:</span>
       </div>
 
-      <div class="lookup-grid" style="grid-template-columns: 1fr 1fr;">
+      <div class="lookup-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div class="lookup-item">
+          <div class="lookup-item-title">Identity</div>
+          <div class="lookup-item-desc">Identifiers, metadata normalised from CCaaS/CRM/ticketing</div>
+        </div>
+        <div class="lookup-item">
+          <div class="lookup-item-title">Streams</div>
+          <div class="lookup-item-desc">Linked streams, promotions, stream-level value</div>
+        </div>
+        <div class="lookup-item">
+          <div class="lookup-item-title">State &amp; Scoring</div>
+          <div class="lookup-item-desc">Friction, risk modifiers, BEI, churn intent</div>
+        </div>
+        <div class="lookup-item">
+          <div class="lookup-item-title">Financial Data</div>
+          <div class="lookup-item-desc">Lifetime value, cost to serve</div>
+        </div>
+        <div class="lookup-item">
+          <div class="lookup-item-title">Issues</div>
+          <div class="lookup-item-desc">Customer issues, churn issues</div>
+        </div>
         <div class="lookup-item">
           <div class="lookup-item-title">Interaction History</div>
-          <div class="lookup-item-desc">repeat_contact_count, activity within context_window</div>
-        </div>
-        <div class="lookup-item">
-          <div class="lookup-item-title">Financial Snapshot</div>
-          <div class="lookup-item-desc">CLTV, cltv_confidence, cost_to_serve</div>
-        </div>
-        <div class="lookup-item">
-          <div class="lookup-item-title">Open Issues</div>
-          <div class="lookup-item-desc">Customer + churn issues, status, categories, reason texts</div>
-        </div>
-        <div class="lookup-item">
-          <div class="lookup-item-title">Linked Streams</div>
-          <div class="lookup-item-desc">Previously assigned stream_id(s) from prior interactions — informs stream resolution</div>
+          <div class="lookup-item-desc">Prior interactions, repeat contact, recent activity</div>
         </div>
       </div>
 
-      <div class="flow-steps" style="margin-top: 12px;">
-        <div class="flow-step">
-          <span class="step-badge enrich">Resolve</span>
-          <span class="step-content"><strong>Stream &amp; Promotion Resolution</strong> — three-tier: metadata match → mapping rule → LLM inference. Set confidence scores &amp; assignment source.</span>
-        </div>
-      </div>
     </div>
 
     <div class="connector">
       <div class="connector-stem"></div>
-      <div class="connector-tag pass"><span class="arrow">↓</span> Enriched interaction + customer state</div>
+      <div class="connector-tag pass"><span class="arrow">↓</span> Customer state assembled</div>
       <div class="connector-stem"></div>
     </div>
 
-    <!-- ═══════════════ PHASE 4: ISSUE LINKING & HANDOFF ═══════════════ -->
+    <!-- ═══════════════ PHASE 4: HANDOFF ═══════════════ -->
     <div class="phase-card linking">
       <div class="phase-number">Phase 4</div>
-      <div class="phase-title">Issue Linking & Handoff</div>
-      <div class="phase-subtitle">customer issue linking (Stage 1) → BEI snapshot → payload build → Customer Impact Discovery handoff</div>
+      <div class="phase-title">Handoff</div>
+      <div class="phase-subtitle">snapshot → payload build → Customer Impact Discovery handoff</div>
       <div class="card-divider"></div>
 
-      <div class="flow-step" style="margin-bottom: 12px;">
-        <span class="step-badge issue">Link</span>
-        <span class="step-content"><strong>Customer Issue Linking (Stage 1)</strong> — hybrid: rule-based + LLM tiebreaker. Uses <code>contact_subcategory</code>, <code>repeat_contact_subcategory</code>, reason text, open issue list. <em>Customer issues only — churn linking happens in Customer Impact Discovery (Stage 2).</em></span>
-      </div>
-
-      <div class="three-col">
-        <div class="outcome-box match">
-          <div class="outcome-label">✓ Match Found</div>
-          <div class="outcome-desc">Confidence ≥ threshold<br>Link to existing open customer issue → set <code>issue_id</code></div>
-        </div>
-        <div class="outcome-box new-issue">
-          <div class="outcome-label">+ New Issue</div>
-          <div class="outcome-desc">No match / new topic<br>Create Issue Object → set <code>issue_id</code></div>
-        </div>
-        <div class="outcome-box review">
-          <div class="outcome-label">⚑ Flag for Review</div>
-          <div class="outcome-desc">Below confidence threshold<br>Create new + flag<br><em>"over-create &gt; mis-link"</em></div>
-        </div>
-      </div>
-
-      <div class="flow-steps" style="margin-top: 14px;">
+      <div class="flow-steps">
         <div class="flow-step">
           <span class="step-badge bei">Snapshot</span>
-          <span class="step-content"><strong>Capture <code>bei_previous</code></strong> from Customer Profile — frozen before downstream processing. Critical for delta computation in revenue attribution.</span>
+          <span class="step-content"><strong>Freeze entire customer state payload</strong> — current values locked until full processing is complete. <code>bei_previous</code> explicitly preserved for delta computation in revenue attribution.</span>
         </div>
         <div class="flow-step">
           <span class="step-badge output">Build</span>
-          <span class="step-content"><strong>Build normalised payload</strong> — enriched interaction + <code>issue_id</code> (nullable) + <code>bei_previous</code></span>
+          <span class="step-content"><strong>Build normalised payload</strong> — normalised transcript, metadata, sentiment labels, frozen customer state snapshot including financial and scoring state, <code>linked_streams</code>, <code>open_issues</code>, <code>interactions_in_context_window</code>, stream config (nullable if unresolved)</span>
         </div>
         <div class="flow-step">
           <span class="step-badge output">Store</span>
@@ -804,78 +806,31 @@
         </div>
         <div class="flow-step">
           <span class="step-badge handoff">Handoff</span>
-          <span class="step-content"><strong>Route to Customer Impact Discovery</strong> — payload includes: normalised transcript, sentiment labels, customer state, issue_id, bei_previous, stream config</span>
+          <span class="step-content"><strong>Route to Customer Impact Discovery</strong></span>
         </div>
       </div>
+
+      <div style="border: 1px solid var(--text-dim); border-radius: 10px; padding: 16px 24px; background: rgba(100, 116, 139, 0.04); margin: 16px 0 0; border-style: dashed;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed var(--text-dim);">Customer Impact Discovery — Inferential Resolution (Tiers 3–4)</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); margin-bottom: 12px; font-style: italic;">When Tiers 1–2 cannot resolve — "we don't have the instructions, how should we classify this ourselves"</div>
+        <div class="branch-row" style="margin: 0;">
+          <div class="branch-box" style="border-color: var(--text-dim); background: rgba(100, 116, 139, 0.04); flex: 1; border-style: dashed;">
+            <div class="branch-label" style="color: var(--text-muted);">Tier 3: LLM Inference</div>
+            <div class="branch-steps">
+              <div class="branch-step" style="color: var(--text-dim);">No metadata, no rules — LLM reads conversation context to infer stream</div>
+            </div>
+          </div>
+          <div class="branch-box" style="border-color: var(--text-dim); background: rgba(100, 116, 139, 0.04); flex: 1; border-style: dashed;">
+            <div class="branch-label" style="color: var(--text-muted);">Tier 4: Linked Streams</div>
+            <div class="branch-steps">
+              <div class="branch-step" style="color: var(--text-dim);">Check Customer Profile for prior stream associations from historical interactions</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); font-style: italic;">↳ These tiers execute downstream in Customer Impact Discovery, not in Smart Ingestion</div>
+      </div>
     </div>
 
-  </div>
-
-  <!-- ═══════════════ LEGEND ═══════════════ -->
-  <div class="legend">
-    <div class="legend-header">Colour Legend</div>
-    <div class="legend-grid">
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--gate-amber);"></div>
-        <div class="legend-text">Decision gates</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--skip-red);"></div>
-        <div class="legend-text">Skip / reject paths</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--voice-green);"></div>
-        <div class="legend-text">Voice processing</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--text-blue);"></div>
-        <div class="legend-text">Text processing</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--sentiment-pink);"></div>
-        <div class="legend-text">Sentiment derivation</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--cleanse-purple);"></div>
-        <div class="legend-text">Cleansing &amp; normalisation</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--enrich-teal);"></div>
-        <div class="legend-text">Enrichment &amp; resolution</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--lookup-orange);"></div>
-        <div class="legend-text">Customer profile lookup</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--issue-indigo);"></div>
-        <div class="legend-text">Issue linking</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--bei-gold);"></div>
-        <div class="legend-text">BEI state capture</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--output-brown);"></div>
-        <div class="legend-text">Output / storage</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background: var(--handoff-violet);"></div>
-        <div class="legend-text">Customer Impact Discovery handoff</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════ SPEC REFERENCES ═══════════════ -->
-  <div class="spec-refs">
-    <div class="spec-refs-header">Specification References</div>
-    <div class="ref-row"><div class="ref-section">§9.1–2</div><div class="ref-desc">Receive, normalise, enrich interaction data</div></div>
-    <div class="ref-row"><div class="ref-section">§2.1</div><div class="ref-desc">Sentiment label derivation (Smart Ingestion, pre-Customer Impact Discovery)</div></div>
-    <div class="ref-row"><div class="ref-section">§9.4</div><div class="ref-desc">Customer profile + open issues retrieval</div></div>
-    <div class="ref-row"><div class="ref-section">§3.3–3.4</div><div class="ref-desc">Customer issue linking — Stage 1 (hybrid rule-based + LLM)</div></div>
-    <div class="ref-row"><div class="ref-section">§6.4</div><div class="ref-desc">BEI snapshot (bei_previous) before downstream writes</div></div>
-    <div class="ref-row"><div class="ref-section">§9.5–6</div><div class="ref-desc">Issue linking output + BEI snapshot</div></div>
-    <div class="ref-row"><div class="ref-section">§1.6</div><div class="ref-desc">Context window — governs repeat count, abandonment, modifier staleness</div></div>
   </div>
 
   <div class="version-tag">smart-ingestion-spec · 18 Feb 2026</div>
