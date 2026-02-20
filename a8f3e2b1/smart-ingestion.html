@@ -715,8 +715,8 @@
           </div>
         </div>
         <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--enrich-teal-border);">
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--voice-green);">✓ Resolved → set <code>stream_id</code>, confidence score &amp; assignment source</div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gate-amber); margin-top: 4px;">⚑ Unresolved → <code>stream_id</code> null, deferred to Customer Impact Discovery (Tiers 3–4)</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--voice-green);">✓ Resolved → set <code>stream_id</code>, confidence score &amp; assignment source. Compute <code>resolved_sltv</code> (A × B × C or flat default) — Streams &amp; Promotions resolution complete.</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gate-amber); margin-top: 4px;">⚑ Unresolved → <code>stream_id</code> null, <code>resolved_sltv</code> null. Deferred to Customer Impact Discovery (Tiers 3–4) where <code>resolved_sltv</code> is computed once stream resolves.</div>
         </div>
       </div>
 
@@ -798,7 +798,7 @@
         </div>
         <div class="flow-step">
           <span class="step-badge output">Build</span>
-          <span class="step-content"><strong>Build normalised payload</strong> — normalised transcript, metadata, sentiment labels, frozen customer state snapshot including financial and scoring state, <code>linked_streams</code>, <code>open_issues</code>, <code>interactions_in_context_window</code>, stream config (nullable if unresolved)</span>
+          <span class="step-content"><strong>Build normalised payload</strong> — normalised transcript, metadata, sentiment labels, frozen customer state snapshot including financial and scoring state, <code>linked_streams</code>, <code>open_issues</code>, <code>interactions_in_context_window</code>, stream config (nullable if unresolved), <code>resolved_sltv</code> (nullable if stream deferred to CID — computed there once Tiers 3–4 resolve)</span>
         </div>
         <div class="flow-step">
           <span class="step-badge output">Store</span>
@@ -823,11 +823,11 @@
           <div class="branch-box" style="border-color: var(--text-dim); background: rgba(100, 116, 139, 0.04); flex: 1; border-style: dashed;">
             <div class="branch-label" style="color: var(--text-muted);">Tier 4: Linked Streams</div>
             <div class="branch-steps">
-              <div class="branch-step" style="color: var(--text-dim);">Check Customer Profile for prior stream associations from historical interactions</div>
+              <div class="branch-step" style="color: var(--text-dim);">Fuzzy resolution using open issues and repeat contact within <code>context_window</code> against customer profile linked streams</div>
             </div>
           </div>
         </div>
-        <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); font-style: italic;">↳ These tiers execute downstream in Customer Impact Discovery, not in Smart Ingestion</div>
+        <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); font-style: italic;">↳ Tiers 3–4 execute in Customer Impact Discovery. Once stream resolves, <code>resolved_sltv</code> is computed there — Streams &amp; Promotions resolution complete at that point.</div>
       </div>
     </div>
 
