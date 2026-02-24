@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revlence — Streams &amp; Promotions</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f9fc;
+    --surface-1: #ffffff;
+    --surface-2: #f2f4f8;
+    --surface-3: #ebeef5;
+    --border: #dde1ec;
+    --border-accent: #b8c0d8;
+    --text: #1a1d2e;
+    --text-dim: #505775;
+    --text-muted: #8890a8;
+
+    --gate-amber: #d19a00;
+    --gate-amber-bg: rgba(209, 154, 0, 0.07);
+    --gate-amber-border: rgba(209, 154, 0, 0.22);
+
+    --skip-red: #c62828;
+    --skip-red-bg: rgba(198, 40, 40, 0.05);
+    --skip-red-border: rgba(198, 40, 40, 0.18);
+
+    --signal-blue: #015cde;
+    --signal-blue-bg: rgba(1, 92, 222, 0.06);
+    --signal-blue-border: rgba(1, 92, 222, 0.18);
+
+    --stream-purple: #6a1b9a;
+    --stream-purple-bg: rgba(106, 27, 154, 0.06);
+    --stream-purple-border: rgba(106, 27, 154, 0.18);
+
+    --financial-green: #1b7d3a;
+    --financial-green-bg: rgba(27, 125, 58, 0.06);
+    --financial-green-border: rgba(27, 125, 58, 0.18);
+
+    --output-brown: #4e342e;
+    --output-brown-bg: rgba(78, 52, 46, 0.05);
+    --output-brown-border: rgba(78, 52, 46, 0.15);
+
+    --handoff-violet: #7341ff;
+    --handoff-violet-bg: rgba(115, 65, 255, 0.08);
+    --handoff-violet-border: rgba(115, 65, 255, 0.22);
+
+    --enrich-teal: #00695c;
+    --enrich-teal-bg: rgba(0, 105, 92, 0.06);
+    --enrich-teal-border: rgba(0, 105, 92, 0.18);
+
+    --null-gray: #546e7a;
+    --null-gray-bg: rgba(84, 110, 122, 0.06);
+    --null-gray-border: rgba(84, 110, 122, 0.20);
+
+    --bei-gold: #f57f17;
+    --bei-gold-bg: rgba(245, 127, 23, 0.08);
+    --bei-gold-border: rgba(245, 127, 23, 0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 64px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse 600px 400px at 15% 8%, rgba(106, 27, 154, 0.025), transparent),
+      radial-gradient(ellipse 500px 500px at 85% 92%, rgba(27, 125, 58, 0.02), transparent);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--stream-purple);
+    margin-bottom: 12px;
+  }
+
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .header p {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 820px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Stage dividers */
+  .stage-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 28px 0 0;
+  }
+
+  .stage-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+
+  .stage-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Entry node */
+  .entry-node {
+    width: 100%;
+    border: 2px solid var(--handoff-violet-border);
+    border-radius: 14px;
+    padding: 20px 32px;
+    background: var(--handoff-violet-bg);
+    text-align: center;
+  }
+
+  .entry-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--handoff-violet);
+    margin-bottom: 6px;
+  }
+
+  .entry-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .entry-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* Phase cards */
+  .phase-card {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 32px;
+    position: relative;
+    background: var(--surface-1);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .phase-card:hover {
+    border-color: var(--border-accent);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+  }
+
+  .phase-number {
+    position: absolute;
+    top: -11px;
+    left: 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 2px 12px;
+    border-radius: 10px;
+    border: 1px solid;
+  }
+
+  .phase-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+    margin-top: 4px;
+  }
+
+  .phase-subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .card-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 0 20px;
+  }
+
+  /* Phase colour themes */
+  .phase-stream .phase-number { color: var(--stream-purple); background: var(--stream-purple-bg); border-color: var(--stream-purple-border); }
+  .phase-promo .phase-number  { color: var(--gate-amber); background: var(--gate-amber-bg); border-color: var(--gate-amber-border); }
+  .phase-financial .phase-number { color: var(--financial-green); background: var(--financial-green-bg); border-color: var(--financial-green-border); }
+  .phase-output .phase-number { color: var(--output-brown); background: var(--output-brown-bg); border-color: var(--output-brown-border); }
+
+  /* Stage labels */
+  .stage-si .stage-label   { color: var(--enrich-teal); background: var(--enrich-teal-bg); border-color: var(--enrich-teal-border); }
+  .stage-cid .stage-label  { color: var(--signal-blue); background: var(--signal-blue-bg); border-color: var(--signal-blue-border); }
+  .stage-promo .stage-label { color: var(--gate-amber); background: var(--gate-amber-bg); border-color: var(--gate-amber-border); }
+  .stage-fin .stage-label  { color: var(--financial-green); background: var(--financial-green-bg); border-color: var(--financial-green-border); }
+  .stage-risk .stage-label { color: var(--bei-gold); background: var(--bei-gold-bg); border-color: var(--bei-gold-border); }
+
+  /* Flow steps */
+  .flow-steps { display: flex; flex-direction: column; gap: 10px; }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-dim);
+  }
+
+  .flow-step strong { color: var(--text); }
+  .flow-step code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--text);
+  }
+
+  .step-badge {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 6px;
+    border: 1px solid;
+    margin-top: 2px;
+  }
+
+  .step-badge.stream   { color: var(--stream-purple); background: var(--stream-purple-bg); border-color: var(--stream-purple-border); }
+  .step-badge.ingest   { color: var(--enrich-teal); background: var(--enrich-teal-bg); border-color: var(--enrich-teal-border); }
+  .step-badge.signal   { color: var(--signal-blue); background: var(--signal-blue-bg); border-color: var(--signal-blue-border); }
+  .step-badge.amber    { color: var(--gate-amber); background: var(--gate-amber-bg); border-color: var(--gate-amber-border); }
+  .step-badge.green    { color: var(--financial-green); background: var(--financial-green-bg); border-color: var(--financial-green-border); }
+  .step-badge.null     { color: var(--null-gray); background: var(--null-gray-bg); border-color: var(--null-gray-border); }
+  .step-badge.output   { color: var(--output-brown); background: var(--output-brown-bg); border-color: var(--output-brown-border); }
+  .step-badge.handoff  { color: var(--handoff-violet); background: var(--handoff-violet-bg); border-color: var(--handoff-violet-border); }
+  .step-badge.bei      { color: var(--bei-gold); background: var(--bei-gold-bg); border-color: var(--bei-gold-border); }
+  .step-badge.skip     { color: var(--skip-red); background: var(--skip-red-bg); border-color: var(--skip-red-border); }
+
+  /* Tier grids */
+  .tier-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 12px 0;
+  }
+
+  .tier-box {
+    border: 1px solid;
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+
+  .tier-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .tier-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .tier-desc {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    line-height: 1.45;
+  }
+
+  .tier-desc code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--text);
+  }
+
+  /* Tier colour variants */
+  .tier-si   { border-color: var(--enrich-teal-border); background: var(--enrich-teal-bg); }
+  .tier-si .tier-label { color: var(--enrich-teal); }
+
+  .tier-cid  { border-color: var(--stream-purple-border); background: var(--stream-purple-bg); }
+  .tier-cid .tier-label { color: var(--stream-purple); }
+
+  .tier-promo { border-color: var(--gate-amber-border); background: var(--gate-amber-bg); }
+  .tier-promo .tier-label { color: var(--gate-amber); }
+
+  .tier-null { border-color: var(--null-gray-border); background: var(--null-gray-bg); }
+  .tier-null .tier-label { color: var(--null-gray); }
+
+  /* Branch rows */
+  .branch-row {
+    display: flex;
+    gap: 12px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+
+  .branch-box {
+    flex: 1;
+    min-width: 180px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: var(--surface-2);
+  }
+
+  .branch-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .branch-steps { display: flex; flex-direction: column; gap: 5px; }
+
+  .branch-step {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .branch-step code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--text);
+  }
+
+  /* Path grid for financial chain */
+  .path-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 12px 0;
+  }
+
+  .path-box {
+    border: 1px solid var(--financial-green-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: var(--financial-green-bg);
+  }
+
+  .path-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--financial-green);
+    margin-bottom: 6px;
+  }
+
+  .path-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .path-desc {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    line-height: 1.45;
+  }
+
+  .path-desc code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--text);
+  }
+
+  /* Output item grid */
+  .output-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .output-item {
+    border: 1px solid var(--output-brown-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: var(--output-brown-bg);
+  }
+
+  .output-item-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--output-brown);
+    margin-bottom: 2px;
+  }
+
+  .output-item-desc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  /* Callout */
+  .callout {
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 12px 0 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .callout.green  { border: 1px solid var(--financial-green-border); background: var(--financial-green-bg); color: var(--financial-green); }
+  .callout.amber  { border: 1px solid var(--gate-amber-border); background: var(--gate-amber-bg); color: var(--gate-amber); }
+  .callout.null   { border: 1px solid var(--null-gray-border); background: var(--null-gray-bg); color: var(--null-gray); }
+  .callout.stream { border: 1px solid var(--stream-purple-border); background: var(--stream-purple-bg); color: var(--stream-purple); }
+  .callout.bei    { border: 1px solid var(--bei-gold-border); background: var(--bei-gold-bg); color: var(--bei-gold); }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid;
+  }
+
+  .section-label.stream  { color: var(--stream-purple); border-color: var(--stream-purple-border); }
+  .section-label.green   { color: var(--financial-green); border-color: var(--financial-green-border); }
+  .section-label.amber   { color: var(--gate-amber); border-color: var(--gate-amber-border); }
+  .section-label.bei     { color: var(--bei-gold); border-color: var(--bei-gold-border); }
+
+  /* Connectors */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+    gap: 0;
+  }
+
+  .connector-stem { width: 2px; height: 18px; background: var(--border-accent); }
+
+  .connector-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    white-space: nowrap;
+  }
+
+  .connector-tag .arrow { margin-right: 4px; }
+
+  .version-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 40px;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">Revlence · Streams &amp; Promotions</div>
+  <h1>Stream &amp; Promotion Resolution</h1>
+  <p>Relationship to Smart Ingestion · Customer Impact Discovery · Financial Chain</p>
+</div>
+
+<div class="pipeline">
+
+  <!-- ═══ ENTRY ═══ -->
+  <div class="entry-node">
+    <div class="entry-label">Input</div>
+    <div class="entry-title">Interaction Received</div>
+    <div class="entry-sub">Stream and promotion resolution begins · Streams module must be on to proceed</div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag"><span class="arrow">↓</span> Streams module check</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- Module gate -->
+  <div class="phase-card">
+    <div class="phase-number" style="color: var(--null-gray); background: var(--null-gray-bg); border-color: var(--null-gray-border);">Gate</div>
+    <div class="phase-title">Module Check</div>
+    <div class="phase-subtitle">streams module on? · if off, exit stream resolution entirely</div>
+    <div class="card-divider"></div>
+    <div class="branch-row">
+      <div class="branch-box" style="border-color: var(--null-gray-border); background: var(--null-gray-bg);">
+        <div class="branch-label" style="color: var(--null-gray);">Streams module off</div>
+        <div class="branch-steps">
+          <div class="branch-step"><code>stream_id = null</code>. Excluded from all stream-scoped outputs. Processing continues without stream context.</div>
+        </div>
+      </div>
+      <div class="branch-box" style="border-color: var(--stream-purple-border); background: var(--stream-purple-bg);">
+        <div class="branch-label" style="color: var(--stream-purple);">Streams module on</div>
+        <div class="branch-steps">
+          <div class="branch-step">Proceed to deterministic resolution in Smart Ingestion (Tiers 1–2).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag"><span class="arrow">↓</span> Begin stream resolution</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- ════════════════ SMART INGESTION — Tiers 1–2 ════════════════ -->
+
+  <div class="stage-header stage-si">
+    <div class="stage-label">Smart Ingestion · Tiers 1–2 · Deterministic Resolution</div>
+    <div class="stage-line"></div>
+  </div>
+
+  <div class="phase-card phase-stream" style="margin-top: 16px;">
+    <div class="phase-number">Tiers 1–2</div>
+    <div class="phase-title">Deterministic Stream Resolution</div>
+    <div class="phase-subtitle">metadata match → mapping rules → resolved or deferred to CID</div>
+    <div class="card-divider"></div>
+
+    <div class="tier-grid">
+      <div class="tier-box tier-si">
+        <div class="tier-label">Tier 1 · Smart Ingestion</div>
+        <div class="tier-title">Metadata Match</div>
+        <div class="tier-desc">Stream ID present in normalised interaction metadata. If active and live: assign. If inactive: check <code>trust_inactive_metadata</code> config — yes: assign, no: fall to Tier 2.</div>
+      </div>
+      <div class="tier-box tier-si">
+        <div class="tier-label">Tier 2 · Smart Ingestion</div>
+        <div class="tier-title">Mapping Rules</div>
+        <div class="tier-desc">No explicit metadata. Apply configured mapping rules (e.g. <code>queue_id = credit_card</code> → Credit Card Stream). Match → assign with confidence 0.90–1.0. No match → defer to CID.</div>
+      </div>
+    </div>
+
+    <div class="branch-row">
+      <div class="branch-box" style="border-color: var(--financial-green-border); background: var(--financial-green-bg);">
+        <div class="branch-label" style="color: var(--financial-green);">✓ Resolved (Tiers 1–2)</div>
+        <div class="branch-steps">
+          <div class="branch-step">Set <code>stream_id</code> · <code>stream_assignment_source</code> · <code>confidence_score</code>. Compute <code>resolved_sltv</code> (A × B × C or flat default). Streams &amp; Promotions resolution complete for this interaction.</div>
+        </div>
+      </div>
+      <div class="branch-box" style="border-color: var(--gate-amber-border); background: var(--gate-amber-bg);">
+        <div class="branch-label" style="color: var(--gate-amber);">⚑ Unresolved</div>
+        <div class="branch-steps">
+          <div class="branch-step"><code>stream_id = null</code> · <code>resolved_sltv = null</code>. Deferred to CID (Tiers 3–4). <code>resolved_sltv</code> computed there once stream resolves.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag"><span class="arrow">↓</span> If unresolved, carry forward to CID</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- ════════════════ CID — Tiers 3–4 ════════════════ -->
+
+  <div class="stage-header stage-cid">
+    <div class="stage-label">Customer Impact Discovery · Tiers 3–4 · Inferential Resolution</div>
+    <div class="stage-line"></div>
+  </div>
+
+  <div class="phase-card phase-stream" style="margin-top: 16px;">
+    <div class="phase-number">Tiers 3–4</div>
+    <div class="phase-title">Inferential Stream Resolution</div>
+    <div class="phase-subtitle">LLM inference → linked stream fuzzy match → resolved or ambiguous</div>
+    <div class="card-divider"></div>
+
+    <div class="tier-grid">
+      <div class="tier-box tier-cid">
+        <div class="tier-label">Tier 3 · CID</div>
+        <div class="tier-title">LLM Inference</div>
+        <div class="tier-desc">No metadata, no rules. LLM reads active stream definitions against conversation context. Confidence ≥ threshold and single clean match → assign (source: inference · confidence 0.50–0.95). Ambiguous or below threshold → Tier 4.</div>
+      </div>
+      <div class="tier-box tier-cid">
+        <div class="tier-label">Tier 4 · CID</div>
+        <div class="tier-title">Linked Streams</div>
+        <div class="tier-desc">Fuzzy resolution using open issues and repeat contact history within <code>context_window</code> against customer profile linked streams. Confident match → assign (source: history). No confident match → pick highest confidence candidate with <code>ambiguity_flag = TRUE</code> for audit.</div>
+      </div>
+    </div>
+
+    <div class="branch-row">
+      <div class="branch-box" style="border-color: var(--financial-green-border); background: var(--financial-green-bg);">
+        <div class="branch-label" style="color: var(--financial-green);">✓ Resolved (Tiers 3–4)</div>
+        <div class="branch-steps">
+          <div class="branch-step">Set <code>stream_id</code> · <code>stream_assignment_source</code> · <code>confidence_score</code>. Compute <code>resolved_sltv</code> here — Streams &amp; Promotions resolution complete.</div>
+        </div>
+      </div>
+      <div class="branch-box" style="border-color: var(--null-gray-border); background: var(--null-gray-bg);">
+        <div class="branch-label" style="color: var(--null-gray);">Unresolvable</div>
+        <div class="branch-steps">
+          <div class="branch-step"><code>stream_id = null</code> · <code>ambiguity_flag = TRUE</code>. Excluded from stream-scoped scoring. No <code>resolved_sltv</code> produced.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag"><span class="arrow">↓</span> Stream resolved · proceed to promotion resolution</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- ════════════════ PROMOTION RESOLUTION — Tiers 1–3 ════════════════ -->
+
+  <div class="stage-header stage-promo">
+    <div class="stage-label">Promotion Resolution · Tiers 1–3</div>
+    <div class="stage-line"></div>
+  </div>
+
+  <div class="phase-card phase-promo" style="margin-top: 16px;">
+    <div class="phase-number">Tiers 1–3</div>
+    <div class="phase-title">Promotion Resolution</div>
+    <div class="phase-subtitle">metadata · customer profile · fuzzy match → promotion config loaded</div>
+    <div class="card-divider"></div>
+
+    <div class="flow-steps" style="margin-bottom: 14px;">
+      <div class="flow-step">
+        <span class="step-badge null">Gate</span>
+        <span>If Promotions module is off: <code>promotion_id = null</code>. Base stream settings apply. No risk amplification. No financial subtraction. Skip to Load Stream Config.</span>
+      </div>
+    </div>
+
+    <div style="border: 1px solid var(--gate-amber-border); border-radius: 10px; padding: 18px 20px; background: var(--gate-amber-bg); margin-bottom: 14px;">
+      <div class="section-label amber">Promotions Module On — Three Tiers</div>
+      <div class="tier-grid">
+        <div class="tier-box tier-promo">
+          <div class="tier-label">Tier 1</div>
+          <div class="tier-title">Metadata Match</div>
+          <div class="tier-desc">Promotion ID present in interaction metadata. Assign directly. Source: metadata.</div>
+        </div>
+        <div class="tier-box tier-promo">
+          <div class="tier-label">Tier 2</div>
+          <div class="tier-title">Customer Profile</div>
+          <div class="tier-desc">No metadata. Check for active promotion linked to the resolved stream on customer profile. Match → assign. Source: mapping.</div>
+        </div>
+        <div class="tier-box tier-promo" style="grid-column: 1 / -1;">
+          <div class="tier-label">Tier 3</div>
+          <div class="tier-title">Fuzzy Match</div>
+          <div class="tier-desc">No profile promotion. Fuzzy match against active promotions on the resolved stream. Match → assign (source: history). No match → <code>promotion_id = null</code>, base settings apply.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <span class="step-badge amber">Load</span>
+        <span><strong>Load stream config.</strong> Check for <code>promotion_financial_subtraction</code> configuration. If configured: load value and pass to Financial Attribution. If not: base SLTV applies, no financial subtraction.</span>
+      </div>
+    </div>
+
+    <div class="callout amber" style="margin-top: 14px;">
+      Promotion context is now locked. Risk amplification and financial subtraction paths determined by resolved promotion state.
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag"><span class="arrow">↓</span> Stream + promotion locked · proceed to financial chain</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- ════════════════ FINANCIAL CHAIN ════════════════ -->
+
+  <div class="stage-header stage-fin">
+    <div class="stage-label">Financial Chain · Stage 1 &amp; 2 · SLTV → CLTV</div>
+    <div class="stage-line"></div>
+  </div>
+
+  <div class="phase-card phase-financial" style="margin-top: 16px;">
+    <div class="phase-number">Stage 1 &amp; 2</div>
+    <div class="phase-title">SLTV &amp; CLTV Resolution</div>
+    <div class="phase-subtitle">resolved_sltv → resolved_cltv via three-path cascade</div>
+    <div class="card-divider"></div>
+
+    <div class="flow-steps" style="margin-bottom: 14px;">
+      <div class="flow-step">
+        <span class="step-badge green">Stage 1</span>
+        <span><strong>Resolve SLTV:</strong> <code>resolved_sltv</code> = A × B × C or flat default. Always stored on the interaction record, even when Path A resolves CLTV directly from metadata. Source of truth for stream-level financial value.</span>
+      </div>
+    </div>
+
+    <div style="border: 1px solid var(--financial-green-border); border-radius: 10px; padding: 18px 20px; background: var(--financial-green-bg); margin-bottom: 4px;">
+      <div class="section-label green">Stage 2 — CLTV Resolution (Three Paths)</div>
+      <div class="path-grid">
+        <div class="path-box">
+          <div class="path-label">Path A</div>
+          <div class="path-title">CLTV from Metadata</div>
+          <div class="path-desc"><code>customer_cltv</code> present in metadata → use directly. <code>cltv_resolution_source = metadata</code>. <code>resolved_sltv</code> stored but not consumed in this path.</div>
+        </div>
+        <div class="path-box">
+          <div class="path-label">Path B · Tier 1</div>
+          <div class="path-title">Customer Metrics</div>
+          <div class="path-desc">All 3 customer metrics present. <code>resolved_cltv = A × B × C</code>. <code>cltv_resolution_source = customer_metrics</code>.</div>
+        </div>
+        <div class="path-box">
+          <div class="path-label">Path B · Tier 2</div>
+          <div class="path-title">Blended Metrics</div>
+          <div class="path-desc">Partial customer metrics. Blend: customer → stream → org fallback. <code>cltv_resolution_source = blended_metrics</code>.</div>
+        </div>
+        <div class="path-box">
+          <div class="path-label">Path B · Tier 3</div>
+          <div class="path-title">Stream Average</div>
+          <div class="path-desc">No customer metrics. <code>resolved_cltv = resolved_sltv</code>. <code>cltv_resolution_source = stream_average</code>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag"><span class="arrow">↓</span> resolved_cltv produced · proceed to Impact Scoring</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- ════════════════ IMPACT SCORING ════════════════ -->
+
+  <div class="stage-header stage-risk">
+    <div class="stage-label">Impact Scoring · Stage 3 · BEI → revenue_at_risk</div>
+    <div class="stage-line"></div>
+  </div>
+
+  <div class="phase-card" style="margin-top: 16px;">
+    <div class="phase-number" style="color: var(--bei-gold); background: var(--bei-gold-bg); border-color: var(--bei-gold-border);">Stage 3</div>
+    <div class="phase-title">Impact Scoring</div>
+    <div class="phase-subtitle">BEI from all platform signals · promotion amplification · revenue_at_risk</div>
+    <div class="card-divider"></div>
+
+    <div class="flow-steps" style="margin-bottom: 14px;">
+      <div class="flow-step">
+        <span class="step-badge bei">Compute</span>
+        <span>BEI calculated from all platform signals: CFS · escalation · duration · urgency · sentiment. No promotion interference at this stage.</span>
+      </div>
+    </div>
+
+    <div class="branch-row">
+      <div class="branch-box" style="border-color: var(--bei-gold-border); background: var(--bei-gold-bg);">
+        <div class="branch-label" style="color: var(--bei-gold);">Promotion resolved</div>
+        <div class="branch-steps">
+          <div class="branch-step">Amplify BEI: <code>amplified_BEI = BEI × promotion_risk_modifier</code></div>
+          <div class="branch-step"><code>promotion_risk_applied = TRUE</code></div>
+          <div class="branch-step"><code>revenue_at_risk = resolved_cltv × f(amplified_BEI)</code></div>
+        </div>
+      </div>
+      <div class="branch-box" style="border-color: var(--null-gray-border); background: var(--null-gray-bg);">
+        <div class="branch-label" style="color: var(--null-gray);">No promotion</div>
+        <div class="branch-steps">
+          <div class="branch-step">BEI unchanged</div>
+          <div class="branch-step"><code>revenue_at_risk = resolved_cltv × f(BEI)</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag"><span class="arrow">↓</span> revenue_at_risk computed · proceed to Financial Attribution</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- ════════════════ FINANCIAL ATTRIBUTION ════════════════ -->
+
+  <div class="stage-header stage-fin">
+    <div class="stage-label">Financial Attribution · Stage 4 · resolved_revenue_at_risk</div>
+    <div class="stage-line"></div>
+  </div>
+
+  <div class="phase-card phase-financial" style="margin-top: 16px;">
+    <div class="phase-number">Stage 4</div>
+    <div class="phase-title">Financial Attribution</div>
+    <div class="phase-subtitle">promotion financial subtraction → resolved_revenue_at_risk</div>
+    <div class="card-divider"></div>
+
+    <div class="branch-row">
+      <div class="branch-box" style="border-color: var(--financial-green-border); background: var(--financial-green-bg);">
+        <div class="branch-label" style="color: var(--financial-green);">promotion_financial_subtraction loaded</div>
+        <div class="branch-steps">
+          <div class="branch-step"><code>resolved_revenue_at_risk = revenue_at_risk - promotion_financial_subtraction</code></div>
+          <div class="branch-step"><code>promotion_financial_applied = TRUE</code></div>
+        </div>
+      </div>
+      <div class="branch-box" style="border-color: var(--null-gray-border); background: var(--null-gray-bg);">
+        <div class="branch-label" style="color: var(--null-gray);">No subtraction configured</div>
+        <div class="branch-steps">
+          <div class="branch-step"><code>resolved_revenue_at_risk = revenue_at_risk</code></div>
+          <div class="branch-step"><code>promotion_financial_applied = FALSE</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag"><span class="arrow">↓</span> Output</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- ════════════════ OUTPUT ════════════════ -->
+
+  <div class="phase-card phase-output">
+    <div class="phase-number" style="color: var(--output-brown); background: var(--output-brown-bg); border-color: var(--output-brown-border);">Output</div>
+    <div class="phase-title">Stored on Interaction Record</div>
+    <div class="phase-subtitle">all stream · promotion · financial · risk outputs</div>
+    <div class="card-divider"></div>
+
+    <div class="output-grid">
+      <div class="output-item">
+        <div class="output-item-label">stream_id</div>
+        <div class="output-item-desc">Resolved or null</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">stream_assignment_source</div>
+        <div class="output-item-desc">metadata · mapping · inference · history</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">stream_confidence_score</div>
+        <div class="output-item-desc">0.50 – 1.0 or null</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">ambiguity_flag</div>
+        <div class="output-item-desc">TRUE if unresolvable</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">promotion_id</div>
+        <div class="output-item-desc">Resolved or null</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">resolved_sltv</div>
+        <div class="output-item-desc">Always stored</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">resolved_cltv</div>
+        <div class="output-item-desc">Via Path A or B</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">cltv_resolution_source</div>
+        <div class="output-item-desc">metadata · customer_metrics · blended · stream_average</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">revenue_at_risk</div>
+        <div class="output-item-desc">Pre-subtraction</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">resolved_revenue_at_risk</div>
+        <div class="output-item-desc">Post-subtraction · surfaces in dashboards</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">promotion_risk_applied</div>
+        <div class="output-item-desc">Boolean</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">promotion_financial_applied</div>
+        <div class="output-item-desc">Boolean</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="version-tag">streams-promotions-spec · Feb 2026</div>
+
+</body>
+</html>
