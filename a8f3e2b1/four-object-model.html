@@ -40,24 +40,6 @@
     align-items: center;
   }
 
-  .header {
-    text-align: center;
-    margin-bottom: 48px;
-  }
-
-  .header-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--accent-blue);
-    margin-bottom: 12px;
-  }
-
-  .header h1 { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
-  .header p { color: var(--text-muted); margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-
   /* --- DIAGRAM AREA --- */
   .diagram-area {
     position: relative;
@@ -211,12 +193,6 @@
 <body>
   <div class="page-wrapper">
 
-    <div class="header">
-      <div class="header-label">§1.3 — Scoring Architecture</div>
-      <h1>The Four-Object Model</h1>
-      <p>explicit read / write / reference relationships</p>
-    </div>
-
     <div class="diagram-area" id="diagramArea">
 
       <div class="scoring-pipeline">
@@ -308,9 +284,9 @@
         <div class="rel-card-title"><span class="rel-from">Interaction</span><span class="rel-arrow">→</span><span class="rel-to-issue">Issue</span></div>
         <div class="rel-card-body">
           Each interaction is linked to a primary issue via <code>issue_id</code> — either a
-          <span class="highlight-cyan">service issue</span> or a <span class="highlight-cyan">churn issue</span>.
+          <span class="highlight-cyan">customer issue</span> or a <span class="highlight-cyan">churn issue</span>.
           When the interaction touches a second issue, it is also linked via <code>linked_issue_id</code>.
-          <div class="rel-detail"><strong>Linking stages:</strong> Service issues linked during <span class="highlight-blue">Smart Ingestion</span>; churn issues linked during <span class="highlight-orange">Customer Impact Discovery</span> after LLM extraction.</div>
+          <div class="rel-detail"><strong>Linking stages:</strong> Customer issues linked during <span class="highlight-blue">Smart Ingestion</span>; churn issues linked during <span class="highlight-orange">Customer Impact Discovery</span> after LLM extraction.</div>
         </div>
       </div>
 
@@ -336,7 +312,7 @@
       </div>
     </div>
 
-    <div class="version-tag">revenue-risk-spec-clean-v4 · Four-Object Model · 18 Feb 2026</div>
+    <div class="version-tag">18 Feb 2026</div>
   </div>
 
 <script>
@@ -365,37 +341,26 @@ function layout() {
   const rI  = rel(cI);
   const rIs = rel(cIs);
 
-  // --- Horizontal layout plan (left to right) ---
-  //
-  // pipeline cards | 16px | brace arms (30px) | brace curves to tip |
-  // 6px | stem | 8px | pill | 8px | stem | 6px | Stream card
-  //
   const pipeRight = rC.right;
 
-  // Brace geometry
-  const braceGap   = 16;   // gap between card edge and brace start
-  const braceWidth = 30;   // horizontal arm length
-  const cr         = 12;   // corner radius for curves
+  const braceGap   = 16;
+  const braceWidth = 30;
+  const cr         = 12;
 
   const xBraceStart = pipeRight + braceGap;
   const xSpine      = xBraceStart + braceWidth;
-  const xTip        = xSpine + cr;  // rightmost point of } curves
+  const xTip        = xSpine + cr;
 
-  // Pill dimensions
   const pillW = 134;
   const pillH = 28;
   const pillR = 14;
 
-  // Gaps between elements
   const tinyGap = 6;
   const stemPillGap = 8;
 
-  // Calculate where Stream card should go (work rightward from tip)
-  // tip → tinyGap → stem(20px min) → stemPillGap → pill → stemPillGap → stem(20px min) → tinyGap → stream
   const minStem = 14;
   const streamLeft = xTip + tinyGap + minStem + stemPillGap + pillW + stemPillGap + minStem + tinyGap;
 
-  // Position Stream card — vertically centered on Interaction, same height
   const interactionHeight = cI.offsetHeight;
   const streamTopY = rI.midY - interactionHeight / 2;
   cS.style.left = streamLeft + 'px';
@@ -404,16 +369,13 @@ function layout() {
 
   const rS = rel(cS);
 
-  // Ensure diagram area is tall enough
   const maxBottom = Math.max(rIs.bottom, rS.bottom) + 20;
   area.style.minHeight = maxBottom + 'px';
 
-  // --- Vertical positions ---
   const yTop = rC.midY;
   const yMid = rI.midY;
   const yBot = rIs.midY;
 
-  // --- Connector segment positions ---
   const xStemLeftStart  = xTip + tinyGap;
   const xPillCx         = xTip + tinyGap + minStem + stemPillGap + pillW / 2;
   const xPillL          = xPillCx - pillW / 2;
@@ -422,14 +384,11 @@ function layout() {
   const xStemRightStart = xPillR + stemPillGap;
   const xStemRightEnd   = rS.left - tinyGap;
 
-  // --- SVG size ---
   svg.setAttribute('width', aR.width);
   svg.setAttribute('height', maxBottom);
   svg.style.width  = aR.width + 'px';
   svg.style.height = maxBottom + 'px';
 
-  // --- Brace } shape ---
-  // Top arm: horizontal → curve down → vertical → curve right to tip
   const topArm = [
     `M ${xBraceStart} ${yTop}`,
     `L ${xSpine - cr} ${yTop}`,
@@ -438,7 +397,6 @@ function layout() {
     `Q ${xSpine} ${yMid}, ${xTip} ${yMid}`
   ].join(' ');
 
-  // Bottom arm: tip → curve down → vertical → curve right → horizontal
   const botArm = [
     `M ${xTip} ${yMid}`,
     `Q ${xSpine} ${yMid}, ${xSpine} ${yMid + cr}`,
@@ -447,30 +405,22 @@ function layout() {
     `L ${xBraceStart} ${yBot}`
   ].join(' ');
 
-  // Middle arm: dashed line from pipeline edge to spine (NOT to tip)
   const midArm = `M ${xBraceStart} ${yMid} L ${xSpine} ${yMid}`;
 
-  // Connector stems (like the vertical stems in READS/WRITES but horizontal)
   const stemLeft  = `M ${xStemLeftStart} ${yMid} L ${xStemLeftEnd} ${yMid}`;
   const stemRight = `M ${xStemRightStart} ${yMid} L ${xStemRightEnd} ${yMid}`;
 
-  // --- Colors ---
   const g   = '#2f855a';
   const gL  = 'rgba(47, 133, 90, 0.35)';
   const gBg = 'rgba(47, 133, 90, 0.06)';
   const gBd = 'rgba(47, 133, 90, 0.3)';
 
   svg.innerHTML = `
-    <!-- Brace } shape -->
     <path d="${topArm}" fill="none" stroke="${gL}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="${botArm}" fill="none" stroke="${gL}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="${midArm}" fill="none" stroke="${gL}" stroke-width="2" stroke-dasharray="4 4"/>
-
-    <!-- Connector stems (gap → stem → gap → pill → gap → stem → gap) -->
     <path d="${stemLeft}" fill="none" stroke="${gL}" stroke-width="2"/>
     <path d="${stemRight}" fill="none" stroke="${gL}" stroke-width="2"/>
-
-    <!-- REFERENCES pill -->
     <rect x="${xPillL}" y="${yMid - pillH/2}" width="${pillW}" height="${pillH}"
       rx="${pillR}" ry="${pillR}" fill="${gBg}" stroke="${gBd}" stroke-width="1.5"/>
     <text x="${xPillCx}" y="${yMid + 1}" text-anchor="middle" dominant-baseline="central"
