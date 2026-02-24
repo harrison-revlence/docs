@@ -648,7 +648,7 @@
     <div class="flow-steps" style="margin-bottom: 16px;">
       <div class="flow-step">
         <span class="step-badge signal">Detect</span>
-        <span class="step-content">Each signal family runs against the transcript and <code>interaction_summary</code>. For each: detect presence → extract plain-language reason → classify to subcategory and category → assign confidence score → extract tags. <strong>Subcategory is the anchor — category is always derived from subcategory, never the reverse.</strong> Families without a detected signal are skipped cleanly.</span>
+        <span class="step-content">Each signal family runs against the transcript and <code>interaction_summary</code>. For each: detect presence → extract plain-language reason → classify to subcategory and category → assign confidence score. <strong>Subcategory is the anchor — category is always derived from subcategory, never the reverse.</strong> Families without a detected signal are skipped cleanly.</span>
       </div>
     </div>
 
@@ -810,7 +810,7 @@
       </div>
       <div class="output-item">
         <div class="output-item-title">Contact Driver</div>
-        <div class="output-item-desc">Flag · reason · subcategory · category · confidence · tags</div>
+        <div class="output-item-desc">Flag · reason · subcategory · category · confidence</div>
       </div>
       <div class="output-item">
         <div class="output-item-title">Dissatisfaction Driver</div>
