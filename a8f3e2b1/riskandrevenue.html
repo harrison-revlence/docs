@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revlence — Impact Scoring & Financial Attribution</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f8f9fc;--surface-1:#ffffff;--surface-2:#f2f4f8;--surface-3:#ebeef5;
+    --border:#dde1ec;--border-accent:#b8c0d8;--text:#1a1d2e;--text-dim:#505775;--text-muted:#8890a8;
+    --violet:#7341ff;--violet-bg:rgba(115,65,255,.07);--violet-border:rgba(115,65,255,.22);
+    --blue:#015cde;--blue-bg:rgba(1,92,222,.06);--blue-border:rgba(1,92,222,.18);
+    --indigo:#3949ab;--indigo-bg:rgba(57,73,171,.06);--indigo-border:rgba(57,73,171,.2);
+    --slate:#455a64;--slate-bg:rgba(69,90,100,.06);--slate-border:rgba(69,90,100,.2);
+    --red:#c62828;--red-bg:rgba(198,40,40,.05);--red-border:rgba(198,40,40,.18);
+    --green-d:#2e7d32;--green-d-bg:rgba(46,125,50,.06);--green-d-border:rgba(46,125,50,.2);
+    --orange:#e65100;--orange-bg:rgba(230,81,0,.06);--orange-border:rgba(230,81,0,.18);
+    --amber:#d19a00;--amber-bg:rgba(209,154,0,.08);--amber-border:rgba(209,154,0,.28);
+    --green:#1b7d3a;--green-bg:rgba(27,125,58,.06);--green-border:rgba(27,125,58,.2);
+    --teal:#00695c;--teal-bg:rgba(0,105,92,.06);--teal-border:rgba(0,105,92,.18);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:48px 24px 64px;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 600px 400px at 12% 6%,rgba(209,154,0,.025),transparent),radial-gradient(ellipse 500px 500px at 88% 90%,rgba(27,125,58,.025),transparent);pointer-events:none;z-index:0;}
+  .header{text-align:center;margin-bottom:40px;position:relative;z-index:1;}
+  .header-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--amber);margin-bottom:12px;}
+  .header h1{font-family:'DM Serif Display',serif;font-size:32px;font-weight:400;color:var(--text);letter-spacing:-.3px;}
+  .header p{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted);margin-top:8px;}
+  .pipeline{display:flex;flex-direction:column;align-items:center;gap:0;max-width:820px;width:100%;position:relative;z-index:1;}
+  .connector{display:flex;flex-direction:column;align-items:center;width:100%;}
+  .connector-stem{width:2px;height:18px;background:var(--border-accent);}
+  .connector-tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);background:var(--surface-2);border:1px solid var(--border);border-radius:20px;padding:4px 14px;white-space:nowrap;}
+  .connector-tag.amber{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-border);}
+  .connector-tag.green{color:var(--green);background:var(--green-bg);border-color:var(--green-border);}
+  .connector-tag.blue{color:var(--blue);background:var(--blue-bg);border-color:var(--blue-border);}
+  .entry-node{width:100%;border:2px solid var(--violet-border);border-radius:14px;padding:20px 32px;background:var(--violet-bg);}
+  .entry-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--violet);margin-bottom:12px;}
+  .entry-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .entry-col{border:1px solid var(--violet-border);border-radius:10px;padding:14px 16px;background:rgba(115,65,255,.04);}
+  .entry-col-title{font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;color:var(--violet);margin-bottom:8px;}
+  .entry-col-items{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);line-height:1.7;}
+  .entry-col-items code{font-size:10.5px;background:var(--surface-3);border:1px solid var(--border);border-radius:3px;padding:1px 5px;color:var(--text);}
+  .phase-card{width:100%;border:1px solid var(--border);border-radius:14px;padding:28px 32px;position:relative;background:var(--surface-1);transition:border-color .3s ease,box-shadow .3s ease;}
+  .phase-card:hover{border-color:var(--border-accent);box-shadow:0 2px 20px rgba(0,0,0,.04);}
+  .phase-number{position:absolute;top:-11px;left:28px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:2px 12px;border-radius:10px;border:1px solid;}
+  .phase-title{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px;margin-top:4px;}
+  .phase-subtitle{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);margin-bottom:20px;}
+  .card-divider{height:1px;background:var(--border);margin:0 0 20px;}
+  .phase-scores .phase-number{color:var(--blue);background:var(--blue-bg);border-color:var(--blue-border);}
+  .phase-friction .phase-number{color:var(--indigo);background:var(--indigo-bg);border-color:var(--indigo-border);}
+  .phase-mods .phase-number{color:var(--slate);background:var(--slate-bg);border-color:var(--slate-border);}
+  .phase-churn .phase-number{color:var(--orange);background:var(--orange-bg);border-color:var(--orange-border);}
+  .phase-bei .phase-number{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-border);}
+  .phase-fin .phase-number{color:var(--green);background:var(--green-bg);border-color:var(--green-border);}
+  .phase-bei{border-color:var(--amber-border);box-shadow:0 2px 24px rgba(209,154,0,.09);}
+  .flow-steps{display:flex;flex-direction:column;gap:10px;}
+  .flow-step{display:flex;align-items:flex-start;gap:12px;font-size:13.5px;line-height:1.55;color:var(--text-dim);}
+  .flow-step strong{color:var(--text);}
+  .flow-step code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--surface-3);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--text);}
+  .badge{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:6px;border:1px solid;margin-top:2px;white-space:nowrap;}
+  .badge.blue{color:var(--blue);background:var(--blue-bg);border-color:var(--blue-border);}
+  .badge.indigo{color:var(--indigo);background:var(--indigo-bg);border-color:var(--indigo-border);}
+  .badge.slate{color:var(--slate);background:var(--slate-bg);border-color:var(--slate-border);}
+  .badge.orange{color:var(--orange);background:var(--orange-bg);border-color:var(--orange-border);}
+  .badge.amber{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-border);}
+  .badge.green{color:var(--green);background:var(--green-bg);border-color:var(--green-border);}
+  .badge.teal{color:var(--teal);background:var(--teal-bg);border-color:var(--teal-border);}
+  .section-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding-bottom:8px;margin-bottom:12px;border-bottom:1px solid;}
+  .section-label.blue{color:var(--blue);border-color:var(--blue-border);}
+  .section-label.indigo{color:var(--indigo);border-color:var(--indigo-border);}
+  .section-label.orange{color:var(--orange);border-color:var(--orange-border);}
+  .section-label.amber{color:var(--amber);border-color:var(--amber-border);}
+  .section-label.green{color:var(--green);border-color:var(--green-border);}
+  .section-label.teal{color:var(--teal);border-color:var(--teal-border);}
+  .callout{border-radius:10px;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.6;}
+  .callout.blue{border:1px solid var(--blue-border);background:var(--blue-bg);color:var(--blue);}
+  .callout.amber{border:1px solid var(--amber-border);background:var(--amber-bg);color:var(--amber);}
+  .callout.green{border:1px solid var(--green-border);background:var(--green-bg);color:var(--green);}
+  .callout.orange{border:1px solid var(--orange-border);background:var(--orange-bg);color:var(--orange);}
+  .scores-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
+  .score-box{border:1px solid var(--blue-border);border-radius:10px;padding:12px 14px;background:var(--blue-bg);}
+  .score-box.standalone{border-color:var(--border);background:var(--surface-2);}
+  .score-box-title{font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;color:var(--blue);margin-bottom:4px;}
+  .score-box.standalone .score-box-title{color:var(--text-muted);}
+  .score-box-desc{font-size:11.5px;color:var(--text-dim);line-height:1.45;}
+  .score-box-formula{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);margin-top:5px;}
+  .mod-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;}
+  .mod-box{border:1px solid;border-radius:10px;padding:14px 16px;}
+  .mod-box.amp{border-color:var(--red-border);background:var(--red-bg);}
+  .mod-box.disc{border-color:var(--green-d-border);background:var(--green-d-bg);}
+  .mod-box-title{font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;margin-bottom:8px;}
+  .mod-box.amp .mod-box-title{color:var(--red);}
+  .mod-box.disc .mod-box-title{color:var(--green-d);}
+  .mod-item{font-size:12px;color:var(--text-dim);line-height:1.55;margin-bottom:5px;}
+  .mod-item code{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--surface-3);border:1px solid var(--border);border-radius:3px;padding:1px 5px;color:var(--text);}
+  .status-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0;}
+  .status-box{border:1px solid;border-radius:8px;padding:10px 12px;}
+  .status-label{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;margin-bottom:4px;}
+  .status-desc{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-dim);line-height:1.5;}
+  .status-desc code{font-size:10px;background:var(--surface-3);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text);}
+  .bei-formula{border:1px solid var(--amber-border);border-radius:10px;padding:18px 20px;background:var(--amber-bg);margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);line-height:1.85;}
+  .bei-formula .k{color:var(--amber);font-weight:600;}
+  .bei-formula .c{color:var(--text-muted);font-style:italic;}
+  .stage-list{display:flex;flex-direction:column;gap:10px;margin:14px 0;}
+  .stage-row{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--green-border);border-radius:10px;padding:14px 16px;background:var(--green-bg);}
+  .stage-num{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);background:rgba(27,125,58,.1);border:1px solid var(--green-border);border-radius:6px;padding:3px 10px;margin-top:1px;white-space:nowrap;}
+  .stage-content{flex:1;}
+  .stage-title{font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .apex{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber);background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:6px;padding:2px 8px;}
+  .stage-body{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);line-height:1.7;}
+  .stage-body code{font-size:10.5px;background:var(--surface-3);border:1px solid var(--border);border-radius:3px;padding:1px 5px;color:var(--text);}
+  .sub-stages{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .sub-stage{border:1px solid var(--teal-border);border-radius:8px;padding:12px 14px;background:var(--teal-bg);}
+  .sub-stage.red-sub{border-color:var(--red-border);background:var(--red-bg);}
+  .sub-stage.oran-sub{border-color:var(--orange-border);background:var(--orange-bg);}
+  .sub-stage-title{font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;color:var(--teal);margin-bottom:4px;}
+  .sub-stage.red-sub .sub-stage-title{color:var(--red);}
+  .sub-stage.oran-sub .sub-stage-title{color:var(--orange);}
+  .sub-stage-body{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-dim);line-height:1.55;}
+  .sub-stage-body code{font-size:10px;background:var(--surface-3);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text);}
+  .churn-tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:5px;padding:1px 6px;margin-left:5px;vertical-align:middle;}
+  .optional-tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:6px;padding:2px 8px;margin-left:8px;vertical-align:middle;}
+  .entry-node,.phase-card,.connector{opacity:0;transform:translateY(14px);animation:fadeUp .45s ease forwards;}
+  .pipeline>:nth-child(1){animation-delay:.05s}.pipeline>:nth-child(2){animation-delay:.12s}.pipeline>:nth-child(3){animation-delay:.18s}.pipeline>:nth-child(4){animation-delay:.24s}.pipeline>:nth-child(5){animation-delay:.30s}.pipeline>:nth-child(6){animation-delay:.36s}.pipeline>:nth-child(7){animation-delay:.42s}.pipeline>:nth-child(8){animation-delay:.48s}.pipeline>:nth-child(9){animation-delay:.54s}.pipeline>:nth-child(10){animation-delay:.60s}.pipeline>:nth-child(11){animation-delay:.66s}.pipeline>:nth-child(12){animation-delay:.72s}.pipeline>:nth-child(13){animation-delay:.78s}.pipeline>:nth-child(14){animation-delay:.84s}
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+  .version-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:40px;letter-spacing:1px;position:relative;z-index:1;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">Revlence · Quantify + Act Layers</div>
+  <h1>Impact Scoring & Financial Attribution</h1>
+  <p>risk-revenue-spec · 26 Feb 2026</p>
+</div>
+
+<div class="pipeline">
+
+  <!-- UPSTREAM HANDOFF -->
+  <div class="entry-node">
+    <div class="entry-label">Received from upstream</div>
+    <div class="entry-cols">
+      <div class="entry-col">
+        <div class="entry-col-title">From Smart Ingestion</div>
+        <div class="entry-col-items">
+          Normalised CCaaS + CRM metadata<br>
+          <code>handling_mode</code> · <code>handle_time_seconds</code><br>
+          <code>start_sentiment_label</code> · <code>end_sentiment_label</code><br>
+          Customer Profile snapshot incl. <code>bei_previous</code><br>
+          Open issues within context window<br>
+          Stream context (Tiers 1–2 resolved, or deferred flag)<br>
+          <code>user_id</code> → <code>team_id</code> frozen at ingestion (CTS path)
+        </div>
+      </div>
+      <div class="entry-col">
+        <div class="entry-col-title">From Customer Impact Discovery</div>
+        <div class="entry-col-items">
+          Seven signal family outputs (CFS inputs):<br>
+          dissatisfaction · repeat contact · escalation · urgency<br>
+          Issue + contact resolution signals<br>
+          Churn: <code>churn_outcome</code> · <code>churn_outcome_signals</code><br>
+          Issue link: <code>issue_id</code> · <code>linked_issue_id</code><br>
+          <code>resolved_sltv</code> (stream resolved Tiers 3–4 if deferred)<br>
+          CRM value: <code>customer_cltv</code> · <code>customer_pltv</code> · factors A/B/C
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag">↓ Upstream processing complete · scoring begins</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- PHASE 1: INTERACTION SCORES -->
+  <div class="phase-card phase-scores">
+    <div class="phase-number">Phase 1</div>
+    <div class="phase-title">Interaction-Level Scores</div>
+    <div class="phase-subtitle">four scores per interaction · three feed BEI pipeline · CID is standalone</div>
+    <div class="card-divider"></div>
+
+    <div class="scores-grid">
+      <div class="score-box">
+        <div class="score-box-title">Customer Friction Score (CFS)</div>
+        <div class="score-box-desc">Friction experienced by the customer on this interaction. Five-component weighted score. Written to the Interaction Object; feeds issue-level aggregation (Phase 2), which feeds BEI.</div>
+        <div class="score-box-formula">dissatisfaction · repeat_contact · time_effort · escalation · transfer → 0–1</div>
+      </div>
+      <div class="score-box">
+        <div class="score-box-title">Outcome Quality Score</div>
+        <div class="score-box-desc">Was the issue resolved and did the interaction close appropriately? Consumed by Risk Modifiers (outcome discount), by the Issue Object at resolution, and by Agent Achievement.</div>
+        <div class="score-box-formula">0.80 × issue_resolution_success + 0.20 × finality_alignment</div>
+      </div>
+      <div class="score-box">
+        <div class="score-box-title">Finality Alignment Score</div>
+        <div class="score-box-desc">Sub-score of Outcome Quality only. Did the closure state match what was required? Rewards appropriate follow-up endings. Does not flow to BEI directly.</div>
+        <div class="score-box-formula">contact_resolution_status × issue_type context → 0–1</div>
+      </div>
+      <div class="score-box" style="border-color:rgba(123,63,160,.22);background:rgba(123,63,160,.05);">
+        <div class="score-box-title" style="color:#7b3fa0;">Customer Intent Difficulty (CID)</div>
+        <div class="score-box-desc">Inherent complexity of the customer's issue, independent of handling quality. Does NOT feed BEI or friction aggregation. Exits to Agent Achievement and Intent Experience Matrix only.</div>
+        <div class="score-box-formula">risk · complexity · dependency · emotion → 0–1 (standalone)</div>
+      </div>
+    </div>
+
+    <div class="callout blue" style="margin-top:4px;">
+      CFS feeds Phase 2 friction aggregation. Outcome Quality feeds Phase 3 as a discount input. Finality Alignment feeds Outcome Quality only — never directly to BEI. CID exits the BEI pipeline entirely.
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag blue">↓ cfs_score written to Interaction Object · outcome_quality_score written to Interaction Object</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- PHASE 2: ISSUE FRICTION -->
+  <div class="phase-card phase-friction">
+    <div class="phase-number">Phase 2</div>
+    <div class="phase-title">Issue-Level Friction Aggregation</div>
+    <div class="phase-subtitle">interaction CFS scores aggregated across open issues on the Customer Profile → primary BEI input</div>
+    <div class="card-divider"></div>
+
+    <div class="flow-step" style="margin-bottom:14px;">
+      <span class="badge indigo">Compute</span>
+      <span><strong>issue_friction_total</strong> — primary friction input to BEI. Sub-computation of BEI, not an independent apex score. Friction is anchored on issues: CFS accumulates per-issue, then issues sum to the customer-level total.</span>
+    </div>
+
+    <div style="border:1px solid var(--indigo-border);border-radius:10px;padding:16px 20px;background:var(--indigo-bg);">
+      <div class="section-label indigo">Contribution by Issue Status</div>
+      <div class="status-grid">
+        <div class="status-box" style="border-color:var(--indigo-border);background:var(--surface-1);">
+          <div class="status-label" style="color:var(--indigo);">OPEN</div>
+          <div class="status-desc">Mean CFS across all linked interactions, equal weighting. Stacks when multiple open issues exist — each contributes independently.</div>
+        </div>
+        <div class="status-box" style="border-color:var(--green-d-border);background:var(--green-d-bg);">
+          <div class="status-label" style="color:var(--green-d);">RESOLVED</div>
+          <div class="status-desc">Contributes zero to <code>issue_friction_total</code>. BEI decay floor handles residual exposure — see Phase 5.</div>
+        </div>
+        <div class="status-box" style="border-color:var(--amber-border);background:var(--amber-bg);">
+          <div class="status-label" style="color:var(--amber);">ABANDONED</div>
+          <div class="status-desc">Holds <code>latest_cfs</code> at full weight. Frozen — no new interactions within context window. Remains a friction contributor.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-step" style="margin-top:12px;">
+      <span class="badge indigo">Note</span>
+      <span style="color:var(--text-dim);font-size:13.5px;"><strong>False resolution amplifier:</strong> each detected false resolution (RESOLVED issue reopened) increases that issue's friction contribution by +10% per occurrence. Repeat friction compounds at both the interaction level (CFS) and the issue level (aggregation weight).</span>
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag">↓ issue_friction_total computed</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- PHASE 3: RISK MODIFIERS -->
+  <div class="phase-card phase-mods">
+    <div class="phase-number">Phase 3</div>
+    <div class="phase-title">Risk Modifiers</div>
+    <div class="phase-subtitle">amplifiers increase exposure weight · discounts reduce it · all values scoped to context_window</div>
+    <div class="card-divider"></div>
+
+    <div class="flow-step" style="margin-bottom:14px;">
+      <span class="badge slate">Concept</span>
+      <span>CFS measures <em>how much friction the customer experienced.</em> Risk Modifiers measure <em>how much that friction exposes the business.</em> Values expire at the <code>context_window</code> boundary — customers without recent activity reset to neutral defaults.</span>
+    </div>
+
+    <div class="mod-row">
+      <div class="mod-box amp">
+        <div class="mod-box-title">↑ Amplifiers — increase exposure</div>
+        <div class="mod-item"><code>escalation_sensitivity</code> — where escalation went. Supervisor 0.33 · Complaints 0.66 · Legal 1.00. Composite weight: 0.15</div>
+        <div class="mod-item"><code>duration_norm</code> — how long the issue has been open, normalised 0–1 with configurable cap. Composite weight: 0.25</div>
+        <div class="mod-item"><code>urgency</code> — Low 0.30 · Medium 0.60 · High 0.90. Composite weight: 0.15</div>
+        <div class="mod-item"><code>promotion_risk_modifier</code> — applied at BEI level when a promotion is active (default 1.25×). Not part of amplifier_composite.</div>
+      </div>
+      <div class="mod-box disc">
+        <div class="mod-box-title">↓ Discounts — reduce exposure</div>
+        <div class="mod-item"><code>outcome_discount</code> — max 40% reduction. Consumes <code>outcome_quality_score</code> from Phase 1 directly. One construct, scored once, discounted once.</div>
+        <div class="mod-item"><code>sentiment_discount</code> — max 20% reduction. Fires only when sentiment improved. Derived as <code>positive_sentiment_shift</code> from the start → end sentiment label pair.</div>
+        <div class="mod-item">Discounts are <strong>multiplicative</strong>, not additive. Max combined reduction: 52% (0.60 × 0.80). Discounts alone cannot reduce BEI to zero.</div>
+      </div>
+    </div>
+
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);line-height:1.75;margin-top:6px;">
+      amplifier_composite = 0.15 × escalation_sensitivity + 0.25 × duration_norm + 0.15 × urgency<br>
+      <span style="color:var(--text-dim);">(weights sum to 0.55 intentionally — additive headroom on top of friction, not proportional shares of a whole)</span><br>
+      discount_composite = outcome_discount × sentiment_discount
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag">↓ amplifier_composite · discount_composite ready</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- PHASE 4: CHURN -->
+  <div class="phase-card phase-churn">
+    <div class="phase-number">Phase 4 <span class="optional-tag">Optional Module</span></div>
+    <div class="phase-title">Churn Intent Probability</div>
+    <div class="phase-subtitle">expressed conversational intent · not behavioural prediction · third BEI input when active</div>
+    <div class="card-divider"></div>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <span class="badge orange">Compute</span>
+        <span><strong>churn_intent_probability</strong> — anchored on <code>churn_outcome</code> base weight (0.0–1.0 lookup across 11-status taxonomy), then adjusted upward by <code>flight_readiness</code> signals extracted by CID.</span>
+      </div>
+      <div class="flow-step">
+        <span class="badge orange">Signals</span>
+        <span><code>flight_readiness</code>: <code>competitor_named</code> (+0.05) · <code>language_finality</code> (+0.01 per level above 2, max +0.03) · <code>time_pressure</code> (+0.02). Cap: +0.10 above base weight.</span>
+      </div>
+      <div class="flow-step">
+        <span class="badge orange">Lifecycle</span>
+        <span>Persists while the churn Issue Object is OPEN. Begins decaying after churn issue resolves (<code>churn_decay_window</code> — lifecycle-driven, TBD). Null when module inactive or no churn intent on any open issue.</span>
+      </div>
+    </div>
+
+    <div class="callout orange" style="margin-top:14px;">
+      When the churn module is active and a churn signal is present, churn_intent_probability becomes the third BEI input. BEI is fully meaningful without it — churn adds precision, not a requirement.
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag amber">↓ All BEI inputs assembled</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- PHASE 5: BEI -->
+  <div class="phase-card phase-bei">
+    <div class="phase-number">Phase 5</div>
+    <div class="phase-title">Business Exposure Index (BEI)</div>
+    <div class="phase-subtitle">0–1 · "how exposed is the business to losing this customer's revenue right now?" · persistent on Customer Profile</div>
+    <div class="card-divider"></div>
+
+    <div class="bei-formula">
+      <span class="c">-- Standard path (churn module off or no churn signal):</span><br>
+      friction_with_modifiers = (issue_friction_total + amplifier_composite) × discount_composite<br>
+      <span class="k">BEI = clamp(friction_with_modifiers, 0, 1)</span><br><br>
+      <span class="c">-- Churn module active AND churn_intent_probability present:</span><br>
+      max_signal = max(friction_with_modifiers, churn_intent_probability)<br>
+      min_signal = min(friction_with_modifiers, churn_intent_probability)<br>
+      <span class="k">BEI = clamp(max_signal + blend_weight × min_signal, 0, 1)</span><br>
+      <span class="c">-- blend_weight default 0.25 · calibration pending</span><br><br>
+      <span class="c">-- Promotion amplification (applied after composition, at Stage 2):</span><br>
+      <span class="k">amplified_BEI = clamp(BEI × promotion_risk_modifier, 0, 1)</span><br><br>
+      <span class="c">-- Decay floor (prevents cliff-drop on issue resolution):</span><br>
+      bei_floor = floor_rate × bei_at_resolution  <span class="c">(floor_rate default 0.15)</span><br>
+      <span class="c">-- Decays linearly from bei_floor to 0 over bei_floor_decay_window (= context_window × 2.0)</span>
+    </div>
+
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-dim);line-height:1.7;margin-top:4px;">
+      BEI lives on the <strong>Customer Profile Object</strong> — persistent, updated after each interaction. <code>bei_previous</code> is snapshotted before processing and stored on the Interaction Object alongside <code>bei_new</code>. <code>bei_delta = bei_previous − bei_new</code> is a first-class reportable field: positive = risk reduced, negative = risk increased.
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag green">↓ BEI written to Customer Profile · Financial Attribution begins</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- PHASE 6: FINANCIAL ATTRIBUTION -->
+  <div class="phase-card phase-fin">
+    <div class="phase-number">Phase 6</div>
+    <div class="phase-title">Financial Attribution</div>
+    <div class="phase-subtitle">four-stage chain · anchored on resolved_cltv × BEI · all outputs stored on Interaction Object</div>
+    <div class="card-divider"></div>
+
+    <div class="stage-list">
+
+      <div class="stage-row">
+        <div class="stage-num">Stage 1</div>
+        <div class="stage-content">
+          <div class="stage-title">Resolved Customer Lifetime Value</div>
+          <div class="stage-body">
+            <strong>resolved_sltv</strong> — already computed wherever stream resolution completed (Smart Ingestion Tiers 1–2, or CID Tiers 3–4 if deferred). Already stored on the Interaction Object. Available here.<br><br>
+            <strong>resolved_cltv</strong> — customer-level value anchor for all downstream calculations.<br>
+            Path A: <code>customer_cltv</code> from CRM metadata — used directly if present.<br>
+            Path B cascade: <code>customer_metrics</code> → <code>blended_metrics</code> → stream average (<code>resolved_sltv</code>).<br>
+            <code>cltv_resolution_source</code> and <code>cltv_resolution_path</code> stored for full audit trail.
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-row">
+        <div class="stage-num">Stage 2</div>
+        <div class="stage-content">
+          <div class="stage-title">Resolved Revenue at Risk <span class="apex">Customer-Level Apex</span></div>
+          <div class="stage-body">
+            <strong>revenue_at_risk</strong> (internal): <code>resolved_cltv × bei_score</code>. When promotion active: <code>resolved_cltv × amplified_BEI</code> where <code>amplified_BEI = clamp(bei × promotion_risk_modifier, 0, 1)</code>.<br>
+            Exception: <code>churn_outcome = not_retained</code> → <code>revenue_at_risk = 0</code> (revenue is lost, no longer at risk).<br><br>
+            <strong>resolved_revenue_at_risk</strong> (terminal, surfaces in dashboards): <code>revenue_at_risk − promotion_financial_subtraction</code> if configured, else equals <code>revenue_at_risk</code>.<br>
+            Written back to Customer Profile after each interaction. Read as <code>resolved_revenue_at_risk_previous</code> at the start of the next interaction's attribution.
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-row">
+        <div class="stage-num">Stage 3</div>
+        <div class="stage-content">
+          <div class="stage-title">Net Commercial Delta (NCD) <span class="apex">Interaction-Level Apex</span></div>
+          <div class="stage-body">
+            <code>ncd = max(resolved_revenue_at_risk_previous − resolved_revenue_at_risk_new, 0) − cts_value</code><br><br>
+            Only positive gross deltas carry forward. When exposure increases, gross delta = 0 and <code>ncd = 0 − cts_value</code>.<br><br>
+            <strong>cts_value</strong> — handling-mode-aware (set by Smart Ingestion via <code>handling_mode</code> + <code>user_id</code> → <code>team_id</code> → team rate config).<br>
+            Human: <code>effective_hourly_rate × (handle_time_seconds / 3600)</code> or flat <code>per_interaction</code> rate.<br>
+            Auto-Agent: <code>bot_cost_per_interaction_{channel}</code> flat rate.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="border:1px solid var(--teal-border);border-radius:10px;padding:18px 20px;background:var(--teal-bg);margin-top:10px;">
+      <div class="section-label teal">Stage 4 — Sub-Scores</div>
+      <div class="sub-stages">
+        <div class="sub-stage">
+          <div class="sub-stage-title">revenue_protected</div>
+          <div class="sub-stage-body">Always computed. Gross delta component of NCD — what NCD would be before CTS is subtracted.<br><code>max(prev − new, 0)</code></div>
+        </div>
+        <div class="sub-stage oran-sub">
+          <div class="sub-stage-title">revenue_saved <span class="churn-tag">Churn</span></div>
+          <div class="sub-stage-body"><code>resolved_cltv</code> when <code>churn_outcome</code> is <code>retained</code> or <code>retained_at_risk</code>. Event metric — fires once per retained churn event.</div>
+        </div>
+        <div class="sub-stage red-sub">
+          <div class="sub-stage-title">revenue_lost <span class="churn-tag">Churn</span></div>
+          <div class="sub-stage-body"><code>resolved_cltv</code> when <code>churn_outcome = not_retained</code>. Also triggers Stage 2 zeroing of <code>revenue_at_risk</code>.</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--teal);line-height:1.6;">
+        Presentation rule: revenue_protected and revenue_saved are mutually exclusive per interaction at the visualisation layer. Revenue Protected is a Stage 3 gross delta sub-score; Revenue Saved is a churn module event metric. Different types — never summed.
+      </div>
+    </div>
+
+    <div class="callout green" style="margin-top:14px;">
+      ✓ All revenue fields written to Interaction Object. Customer Profile updated: resolved_revenue_at_risk (new state) · cts_total (running total). Outputs available to Performance Management.
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag" style="color:#7b3fa0;background:rgba(123,63,160,.06);border-color:rgba(123,63,160,.2);">↓ Scoring outputs available · Performance Management begins</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- PHASE 7: PERFORMANCE MANAGEMENT -->
+  <div class="phase-card phase-perf" style="border-color:rgba(123,63,160,.25);box-shadow:0 2px 20px rgba(123,63,160,.06);">
+    <div class="phase-number" style="color:#7b3fa0;background:rgba(123,63,160,.07);border-color:rgba(123,63,160,.22);">Phase 7</div>
+    <div class="phase-title">Performance Management</div>
+    <div class="phase-subtitle">agent-level outputs · powered by interaction and financial data · feeds indices in Phase 8</div>
+    <div class="card-divider"></div>
+
+    <div class="scores-grid">
+      <div class="score-box" style="border-color:rgba(123,63,160,.22);background:rgba(123,63,160,.05);">
+        <div class="score-box-title" style="color:#7b3fa0;">Agent Achievement Score</div>
+        <div class="score-box-desc">Measures how well the agent handled the interaction relative to its difficulty and outcome. Consumes CID (difficulty baseline), Outcome Quality Score (resolution success), and Sentiment Labels (trajectory multiplier). Core agent performance signal.</div>
+        <div class="score-box-formula">cid_score · outcome_quality_score · sentiment_trajectory_multiplier → 0–1</div>
+      </div>
+      <div class="score-box" style="border-color:rgba(123,63,160,.22);background:rgba(123,63,160,.05);">
+        <div class="score-box-title" style="color:#7b3fa0;">Agent Achievement Efficiency <span style="font-family:'JetBrains Mono';font-size:9px;color:#7b3fa0;background:rgba(123,63,160,.08);border:1px solid rgba(123,63,160,.22);border-radius:5px;padding:1px 7px;margin-left:5px;">Sub-score</span></div>
+        <div class="score-box-desc">Sub-score of Agent Achievement. Adjusts achievement for cost-efficiency — penalises unnecessarily long or expensive interactions for the outcome delivered. Consumes CTS data and handle time relative to stream norms.</div>
+        <div class="score-box-formula">outcome_quality_score / normalised_cts_cost → efficiency-adjusted 0–1</div>
+      </div>
+      <div class="score-box" style="border-color:rgba(123,63,160,.22);background:rgba(123,63,160,.05);">
+        <div class="score-box-title" style="color:#7b3fa0;">Interaction Quality</div>
+        <div class="score-box-desc">Measures the quality of the interaction as experienced by the customer — how well the agent navigated the conversation, handled friction triggers, and brought the interaction to an appropriate close. Not the same as Outcome Quality (which is about whether the issue resolved), nor Agent Achievement (which is about how the agent performed relative to difficulty).</div>
+        <div class="score-box-formula">Conversation handling · friction navigation · finality alignment context → 0–1</div>
+      </div>
+      <div class="score-box" style="border-color:rgba(123,63,160,.22);background:rgba(123,63,160,.05);">
+        <div class="score-box-title" style="color:#7b3fa0;">Agent Commercial Impact</div>
+        <div class="score-box-desc">Measures the agent's commercial contribution on this interaction. Directly consumes NCD (net commercial delta after CTS) and revenue event metrics (revenue_saved, revenue_lost). Connects agent performance to the financial outcomes it produced.</div>
+        <div class="score-box-formula">ncd · revenue_saved · revenue_lost context → commercial impact index 0–1</div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:4px;border:1px solid rgba(123,63,160,.2);background:rgba(123,63,160,.05);color:#7b3fa0;">
+      Agent Achievement Efficiency is a sub-score of Agent Achievement — it adjusts the achievement score for cost. Interaction Quality and Agent Commercial Impact are independent scores, not sub-scores. All four feed Phase 8 indices.
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag" style="color:#b07d00;background:rgba(176,125,0,.06);border-color:rgba(176,125,0,.22);">↓ Performance scores computed · Indices begin</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- PHASE 8: INDICES -->
+  <div class="phase-card" style="border-color:rgba(176,125,0,.25);box-shadow:0 2px 20px rgba(176,125,0,.07);">
+    <div class="phase-number" style="color:#b07d00;background:rgba(176,125,0,.07);border-color:rgba(176,125,0,.22);">Phase 8</div>
+    <div class="phase-title">Impact Scores</div>
+    <div class="phase-subtitle">two composite scores · agent-level and customer-level · both feed the apex CII in Phase 9</div>
+    <div class="card-divider"></div>
+
+    <div class="scores-grid">
+      <div class="score-box" style="border-color:rgba(123,63,160,.22);background:rgba(123,63,160,.05);">
+        <div class="score-box-title" style="color:#7b3fa0;">Agent Impact Index (AII)</div>
+        <div class="score-box-desc">Composite agent-level index. Synthesises three Performance Management outputs: Agent Achievement, Interaction Quality, and Agent Commercial Impact. The single-number answer to "how impactful was this agent on this interaction?"</div>
+        <div class="score-box-formula">Powered by Performance Management → 0–1 composite index</div>
+      </div>
+      <div class="score-box" style="border-color:rgba(176,125,0,.22);background:rgba(176,125,0,.05);">
+        <div class="score-box-title" style="color:#b07d00;">Customer Impact Score (CIS)</div>
+        <div class="score-box-desc">Measures the cumulative impact of all interactions on this customer relationship within the context window — combining risk trajectory (BEI delta), net commercial outcome (NCD), revenue event history, and friction load (CFS). Built from per-interaction IIS values but reported and governed at the customer level.</div>
+        <div class="score-box-formula">BEI delta · NCD · revenue events · CFS aggregated per customer → customer-level 0–1</div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-dim);line-height:1.7;">
+      AII and CIS operate at different scopes: <strong>AII</strong> is per-interaction, per-agent; <strong>CIS</strong> is per-customer, accumulating across all interactions within the context window. Both roll into the portfolio-level CII in Phase 9.
+    </div>
+  </div>
+
+  <div class="connector">
+    <div class="connector-stem"></div>
+    <div class="connector-tag" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">↓ AII + CIS computed · Portfolio apex</div>
+    <div class="connector-stem"></div>
+  </div>
+
+  <!-- PHASE 9: CII APEX -->
+  <div class="phase-card" style="border-color:rgba(180,30,30,.28);box-shadow:0 4px 32px rgba(180,30,30,.10);">
+    <div class="phase-number" style="color:#b41e1e;background:rgba(180,30,30,.07);border-color:rgba(180,30,30,.22);">Phase 9</div>
+    <div class="phase-title">Customer Impact Index (CII) <span style="font-family:'JetBrains Mono';font-size:10px;font-weight:700;letter-spacing:1px;color:#b41e1e;background:rgba(180,30,30,.08);border:1px solid rgba(180,30,30,.22);border-radius:6px;padding:2px 10px;margin-left:10px;vertical-align:middle;">Apex · Board-Level</span></div>
+    <div class="phase-subtitle">all customers · all streams · all risk profiles · governed, revenue-aligned replacement for NPS</div>
+    <div class="card-divider"></div>
+
+    <div style="border:1px solid rgba(180,30,30,.22);border-radius:10px;padding:18px 20px;background:rgba(180,30,30,.04);margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);line-height:1.85;">
+      <span style="color:#b41e1e;font-weight:600;">CII</span> = aggregation of <span style="color:#b07d00;">CIS</span> across all customers,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;weighted by <span style="color:var(--amber);">BEI</span> (risk exposure) and <span style="color:var(--green);">resolved_cltv</span> (revenue weight),<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;segmented across all streams and risk profiles<br>
+      <span style="color:var(--text-muted);font-style:italic;">-- Composition formula and weights: specification pending</span>
+    </div>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <span class="badge" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">NPS Replacement</span>
+        <span>CII occupies the same board-level reporting slot as NPS but is computed continuously from real interaction data rather than collected via survey at low frequency. A single number that moves in response to actual customer outcomes, with full causal traceability into which streams, issue types, risk profiles, and agent behaviours are driving it.</span>
+      </div>
+      <div class="flow-step">
+        <span class="badge" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">Traceability</span>
+        <span>Every CII movement is explainable bottom-up: CII shifts because CIS shifted for specific customers, because IIS shifted on specific interactions, because BEI or NCD moved, because of specific issue types, agents, or friction patterns. No survey lag, no sample bias, no black box.</span>
+      </div>
+      <div class="flow-step">
+        <span class="badge" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">Revenue Weighting</span>
+        <span>Unlike NPS, CII weights each customer by <code>resolved_cltv</code> and their current <code>BEI</code>. A deteriorating high-value customer at high risk moves CII more than a stable low-value customer. The index reflects commercial exposure, not just volume of dissatisfaction.</span>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:14px;border:1px solid rgba(180,30,30,.2);background:rgba(180,30,30,.05);color:#b41e1e;">
+      ✓ Pipeline complete. Every metric from agent performance to portfolio health is traceable through the full chain back to the raw interaction transcript and CRM metadata ingested at Phase 0.
+    </div>
+  </div>
+
+</div>
+
+<div class="version-tag">risk-revenue-spec · 26 Feb 2026</div>
+
+</body>
+</html>
