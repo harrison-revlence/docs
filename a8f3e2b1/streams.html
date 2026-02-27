@@ -53,9 +53,9 @@
     --null-gray-bg: rgba(84, 110, 122, 0.06);
     --null-gray-border: rgba(84, 110, 122, 0.20);
 
-    --bei-gold: #f57f17;
-    --bei-gold-bg: rgba(245, 127, 23, 0.08);
-    --bei-gold-border: rgba(245, 127, 23, 0.25);
+    --rsi-amber: #f57f17;
+    --rsi-amber-bg: rgba(245, 127, 23, 0.08);
+    --rsi-amber-border: rgba(245, 127, 23, 0.25);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -250,7 +250,7 @@
   .stage-cid .stage-label  { color: var(--signal-blue); background: var(--signal-blue-bg); border-color: var(--signal-blue-border); }
   .stage-promo .stage-label { color: var(--gate-amber); background: var(--gate-amber-bg); border-color: var(--gate-amber-border); }
   .stage-fin .stage-label  { color: var(--financial-green); background: var(--financial-green-bg); border-color: var(--financial-green-border); }
-  .stage-risk .stage-label { color: var(--bei-gold); background: var(--bei-gold-bg); border-color: var(--bei-gold-border); }
+  .stage-risk .stage-label { color: var(--rsi-amber); background: var(--rsi-amber-bg); border-color: var(--rsi-amber-border); }
 
   /* Flow steps */
   .flow-steps { display: flex; flex-direction: column; gap: 10px; }
@@ -296,7 +296,7 @@
   .step-badge.null     { color: var(--null-gray); background: var(--null-gray-bg); border-color: var(--null-gray-border); }
   .step-badge.output   { color: var(--output-brown); background: var(--output-brown-bg); border-color: var(--output-brown-border); }
   .step-badge.handoff  { color: var(--handoff-violet); background: var(--handoff-violet-bg); border-color: var(--handoff-violet-border); }
-  .step-badge.bei      { color: var(--bei-gold); background: var(--bei-gold-bg); border-color: var(--bei-gold-border); }
+  .step-badge.rsi      { color: var(--rsi-amber); background: var(--rsi-amber-bg); border-color: var(--rsi-amber-border); }
   .step-badge.skip     { color: var(--skip-red); background: var(--skip-red-bg); border-color: var(--skip-red-border); }
 
   /* Tier grids */
@@ -494,7 +494,7 @@
   .callout.amber  { border: 1px solid var(--gate-amber-border); background: var(--gate-amber-bg); color: var(--gate-amber); }
   .callout.null   { border: 1px solid var(--null-gray-border); background: var(--null-gray-bg); color: var(--null-gray); }
   .callout.stream { border: 1px solid var(--stream-purple-border); background: var(--stream-purple-bg); color: var(--stream-purple); }
-  .callout.bei    { border: 1px solid var(--bei-gold-border); background: var(--bei-gold-bg); color: var(--bei-gold); }
+  .callout.rsi    { border: 1px solid var(--rsi-amber-border); background: var(--rsi-amber-bg); color: var(--rsi-amber); }
 
   .section-label {
     font-family: 'JetBrains Mono', monospace;
@@ -510,7 +510,7 @@
   .section-label.stream  { color: var(--stream-purple); border-color: var(--stream-purple-border); }
   .section-label.green   { color: var(--financial-green); border-color: var(--financial-green-border); }
   .section-label.amber   { color: var(--gate-amber); border-color: var(--gate-amber-border); }
-  .section-label.bei     { color: var(--bei-gold); border-color: var(--bei-gold-border); }
+  .section-label.rsi     { color: var(--rsi-amber); border-color: var(--rsi-amber-border); }
 
   /* Connectors */
   .connector {
@@ -810,37 +810,37 @@
   <!-- ════════════════ IMPACT SCORING ════════════════ -->
 
   <div class="stage-header stage-risk">
-    <div class="stage-label">Impact Scoring · Stage 3 · BEI → revenue_at_risk</div>
+    <div class="stage-label">Impact Scoring · Stage 3 · RSI → revenue_at_risk</div>
     <div class="stage-line"></div>
   </div>
 
   <div class="phase-card" style="margin-top: 16px;">
-    <div class="phase-number" style="color: var(--bei-gold); background: var(--bei-gold-bg); border-color: var(--bei-gold-border);">Stage 3</div>
+    <div class="phase-number" style="color: var(--rsi-amber); background: var(--rsi-amber-bg); border-color: var(--rsi-amber-border);">Stage 3</div>
     <div class="phase-title">Impact Scoring</div>
-    <div class="phase-subtitle">BEI from all platform signals · promotion amplification · revenue_at_risk</div>
+    <div class="phase-subtitle">RSI from all platform signals · promotion amplification · revenue_at_risk</div>
     <div class="card-divider"></div>
 
     <div class="flow-steps" style="margin-bottom: 14px;">
       <div class="flow-step">
-        <span class="step-badge bei">Compute</span>
-        <span>BEI calculated from all platform signals: CFS · escalation · duration · urgency · sentiment. No promotion interference at this stage.</span>
+        <span class="step-badge rsi">Compute</span>
+        <span>RSI calculated from all platform signals: CFS · escalation · duration · urgency · sentiment. No promotion interference at this stage.</span>
       </div>
     </div>
 
     <div class="branch-row">
-      <div class="branch-box" style="border-color: var(--bei-gold-border); background: var(--bei-gold-bg);">
-        <div class="branch-label" style="color: var(--bei-gold);">Promotion resolved</div>
+      <div class="branch-box" style="border-color: var(--rsi-amber-border); background: var(--rsi-amber-bg);">
+        <div class="branch-label" style="color: var(--rsi-amber);">Promotion resolved</div>
         <div class="branch-steps">
-          <div class="branch-step">Amplify BEI: <code>amplified_BEI = BEI × promotion_risk_modifier</code></div>
+          <div class="branch-step">Amplify RSI: <code>amplified_rsi = rsi_score × promotion_risk_modifier</code></div>
           <div class="branch-step"><code>promotion_risk_applied = TRUE</code></div>
-          <div class="branch-step"><code>revenue_at_risk = resolved_cltv × f(amplified_BEI)</code></div>
+          <div class="branch-step"><code>revenue_at_risk = resolved_cltv × f(amplified_rsi)</code></div>
         </div>
       </div>
       <div class="branch-box" style="border-color: var(--null-gray-border); background: var(--null-gray-bg);">
         <div class="branch-label" style="color: var(--null-gray);">No promotion</div>
         <div class="branch-steps">
-          <div class="branch-step">BEI unchanged</div>
-          <div class="branch-step"><code>revenue_at_risk = resolved_cltv × f(BEI)</code></div>
+          <div class="branch-step">RSI unchanged</div>
+          <div class="branch-step"><code>revenue_at_risk = resolved_cltv × f(rsi_score)</code></div>
         </div>
       </div>
     </div>
@@ -862,7 +862,7 @@
   <div class="phase-card phase-financial" style="margin-top: 16px;">
     <div class="phase-number">Stage 4</div>
     <div class="phase-title">Financial Attribution</div>
-    <div class="phase-subtitle">promotion financial subtraction → resolved_revenue_at_risk</div>
+    <div class="phase-subtitle">promotion financial subtraction → resolved_revenue_at_risk · resolved_revenue_secure written to Customer Profile</div>
     <div class="card-divider"></div>
 
     <div class="branch-row">
@@ -880,6 +880,10 @@
           <div class="branch-step"><code>promotion_financial_applied = FALSE</code></div>
         </div>
       </div>
+    </div>
+
+    <div class="callout green" style="margin-top: 4px;">
+      After resolved_revenue_at_risk is set: <code>resolved_revenue_secure = resolved_cltv − resolved_revenue_at_risk</code> is computed and written to the Customer Profile. On <code>churn_outcome = not_retained</code>: both <code>resolved_revenue_at_risk</code> and <code>resolved_cltv</code> are zeroed on the Customer Profile.
     </div>
   </div>
 
@@ -937,6 +941,18 @@
       <div class="output-item">
         <div class="output-item-label">resolved_revenue_at_risk</div>
         <div class="output-item-desc">Post-subtraction · surfaces in dashboards</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">resolved_revenue_secure</div>
+        <div class="output-item-desc">resolved_cltv − resolved_revenue_at_risk · Customer Profile</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">revenue_protected</div>
+        <div class="output-item-desc">Gross positive delta · always computed</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-label">revenue_eroded</div>
+        <div class="output-item-desc">Gross negative delta · always computed</div>
       </div>
       <div class="output-item">
         <div class="output-item-label">promotion_risk_applied</div>
