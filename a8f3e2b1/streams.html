@@ -126,7 +126,6 @@
     z-index: 1;
   }
 
-  /* Stage dividers */
   .stage-header {
     width: 100%;
     display: flex;
@@ -153,7 +152,6 @@
     background: var(--border);
   }
 
-  /* Entry node */
   .entry-node {
     width: 100%;
     border: 2px solid var(--handoff-violet-border);
@@ -187,7 +185,6 @@
     margin-top: 4px;
   }
 
-  /* Phase cards */
   .phase-card {
     width: 100%;
     border: 1px solid var(--border);
@@ -239,20 +236,17 @@
     margin: 0 0 20px;
   }
 
-  /* Phase colour themes */
   .phase-stream .phase-number { color: var(--stream-purple); background: var(--stream-purple-bg); border-color: var(--stream-purple-border); }
   .phase-promo .phase-number  { color: var(--gate-amber); background: var(--gate-amber-bg); border-color: var(--gate-amber-border); }
   .phase-financial .phase-number { color: var(--financial-green); background: var(--financial-green-bg); border-color: var(--financial-green-border); }
   .phase-output .phase-number { color: var(--output-brown); background: var(--output-brown-bg); border-color: var(--output-brown-border); }
 
-  /* Stage labels */
   .stage-si .stage-label   { color: var(--enrich-teal); background: var(--enrich-teal-bg); border-color: var(--enrich-teal-border); }
   .stage-cid .stage-label  { color: var(--signal-blue); background: var(--signal-blue-bg); border-color: var(--signal-blue-border); }
   .stage-promo .stage-label { color: var(--gate-amber); background: var(--gate-amber-bg); border-color: var(--gate-amber-border); }
   .stage-fin .stage-label  { color: var(--financial-green); background: var(--financial-green-bg); border-color: var(--financial-green-border); }
   .stage-risk .stage-label { color: var(--rsi-amber); background: var(--rsi-amber-bg); border-color: var(--rsi-amber-border); }
 
-  /* Flow steps */
   .flow-steps { display: flex; flex-direction: column; gap: 10px; }
 
   .flow-step {
@@ -299,7 +293,6 @@
   .step-badge.rsi      { color: var(--rsi-amber); background: var(--rsi-amber-bg); border-color: var(--rsi-amber-border); }
   .step-badge.skip     { color: var(--skip-red); background: var(--skip-red-bg); border-color: var(--skip-red-border); }
 
-  /* Tier grids */
   .tier-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -346,7 +339,6 @@
     color: var(--text);
   }
 
-  /* Tier colour variants */
   .tier-si   { border-color: var(--enrich-teal-border); background: var(--enrich-teal-bg); }
   .tier-si .tier-label { color: var(--enrich-teal); }
 
@@ -359,7 +351,6 @@
   .tier-null { border-color: var(--null-gray-border); background: var(--null-gray-bg); }
   .tier-null .tier-label { color: var(--null-gray); }
 
-  /* Branch rows */
   .branch-row {
     display: flex;
     gap: 12px;
@@ -401,7 +392,6 @@
     color: var(--text);
   }
 
-  /* Path grid for financial chain */
   .path-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -450,7 +440,6 @@
     color: var(--text);
   }
 
-  /* Output item grid */
   .output-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -480,7 +469,6 @@
     line-height: 1.4;
   }
 
-  /* Callout */
   .callout {
     border-radius: 10px;
     padding: 12px 16px;
@@ -512,7 +500,6 @@
   .section-label.amber   { color: var(--gate-amber); border-color: var(--gate-amber-border); }
   .section-label.rsi     { color: var(--rsi-amber); border-color: var(--rsi-amber-border); }
 
-  /* Connectors */
   .connector {
     display: flex;
     flex-direction: column;
@@ -558,7 +545,7 @@
 
 <div class="pipeline">
 
-  <!-- ═══ ENTRY ═══ -->
+  <!-- ENTRY -->
   <div class="entry-node">
     <div class="entry-label">Input</div>
     <div class="entry-title">Interaction Received</div>
@@ -599,7 +586,7 @@
     <div class="connector-stem"></div>
   </div>
 
-  <!-- ════════════════ SMART INGESTION — Tiers 1–2 ════════════════ -->
+  <!-- SMART INGESTION — Tiers 1–2 -->
 
   <div class="stage-header stage-si">
     <div class="stage-label">Smart Ingestion · Tiers 1–2 · Deterministic Resolution</div>
@@ -647,7 +634,7 @@
     <div class="connector-stem"></div>
   </div>
 
-  <!-- ════════════════ CID — Tiers 3–4 ════════════════ -->
+  <!-- CID — Tiers 3–4 -->
 
   <div class="stage-header stage-cid">
     <div class="stage-label">Customer Impact Discovery · Tiers 3–4 · Inferential Resolution</div>
@@ -695,7 +682,7 @@
     <div class="connector-stem"></div>
   </div>
 
-  <!-- ════════════════ PROMOTION RESOLUTION — Tiers 1–3 ════════════════ -->
+  <!-- PROMOTION RESOLUTION — Tiers 1–3 -->
 
   <div class="stage-header stage-promo">
     <div class="stage-label">Promotion Resolution · Tiers 1–3</div>
@@ -754,7 +741,7 @@
     <div class="connector-stem"></div>
   </div>
 
-  <!-- ════════════════ FINANCIAL CHAIN ════════════════ -->
+  <!-- FINANCIAL CHAIN -->
 
   <div class="stage-header stage-fin">
     <div class="stage-label">Financial Chain · Stage 1 &amp; 2 · SLTV → CLTV</div>
@@ -807,10 +794,10 @@
     <div class="connector-stem"></div>
   </div>
 
-  <!-- ════════════════ IMPACT SCORING ════════════════ -->
+  <!-- IMPACT SCORING -->
 
   <div class="stage-header stage-risk">
-    <div class="stage-label">Impact Scoring · Stage 3 · RSI → revenue_at_risk</div>
+    <div class="stage-label">Impact Scoring · Stage 3 · EVI → revenue_at_risk</div>
     <div class="stage-line"></div>
   </div>
 
@@ -852,7 +839,7 @@
     <div class="connector-stem"></div>
   </div>
 
-  <!-- ════════════════ FINANCIAL ATTRIBUTION ════════════════ -->
+  <!-- FINANCIAL ATTRIBUTION -->
 
   <div class="stage-header stage-fin">
     <div class="stage-label">Financial Attribution · Stage 4 · resolved_revenue_at_risk</div>
@@ -893,7 +880,7 @@
     <div class="connector-stem"></div>
   </div>
 
-  <!-- ════════════════ OUTPUT ════════════════ -->
+  <!-- OUTPUT -->
 
   <div class="phase-card phase-output">
     <div class="phase-number" style="color: var(--output-brown); background: var(--output-brown-bg); border-color: var(--output-brown-border);">Output</div>
