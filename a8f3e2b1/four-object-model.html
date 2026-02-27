@@ -204,7 +204,7 @@
           <div class="profile-grid">
             <div class="profile-sub-card"><div class="sub-card-title">Identity</div><div class="sub-card-body">Customer ID, metadata</div></div>
             <div class="profile-sub-card"><div class="sub-card-title">Streams</div><div class="sub-card-body">Streams, Promotions, SLTV</div></div>
-            <div class="profile-sub-card"><div class="sub-card-title">State &amp; Scoring</div><div class="sub-card-body">Friction, Risk, BEI, Churn (Optional)</div></div>
+            <div class="profile-sub-card"><div class="sub-card-title">State &amp; Scoring</div><div class="sub-card-body">Friction, Risk, RSI, Churn (Optional)</div></div>
             <div class="profile-sub-card"><div class="sub-card-title">Financial Data</div><div class="sub-card-body">CLTV, Cost to Serve</div></div>
             <div class="profile-sub-card"><div class="sub-card-title">Issues</div><div class="sub-card-body">Customer Issues, Churn Issues</div></div>
             <div class="profile-sub-card"><div class="sub-card-title">Interaction History</div><div class="sub-card-body">Interactions, Repeat Contact Counts, Activity within Context Window</div></div>
@@ -226,10 +226,10 @@
           <div class="card-subtitle">(ephemeral transformation event)</div>
           <div class="card-divider"></div>
           <div class="phases">
-            <div class="phase"><span class="phase-badge read">Phase 1</span><span class="phase-content"><strong>READ</strong> customer state (previous BEI, friction, modifiers, churn intent, open issues)</span></div>
+            <div class="phase"><span class="phase-badge read">Phase 1</span><span class="phase-content"><strong>READ</strong> customer state (rsi_previous, friction, modifiers, churn intent, open issues)</span></div>
             <div class="phase"><span class="phase-badge compute">Phase 2</span><span class="phase-content"><strong>COMPUTE</strong> interaction scores (CID, CFS, risk modifiers, churn intent if applicable)</span></div>
-            <div class="phase"><span class="phase-badge write">Phase 3</span><span class="phase-content"><strong>WRITE</strong> updated customer profiles (aggregate friction, update modifiers, recompute BEI)</span></div>
-            <div class="phase"><span class="phase-badge compute2">Phase 4</span><span class="phase-content"><strong>COMPUTE</strong> deltas + revenue (BEI delta → revenue_protected, churn events → revenue_saved/lost)</span></div>
+            <div class="phase"><span class="phase-badge write">Phase 3</span><span class="phase-content"><strong>WRITE</strong> updated customer profiles (aggregate friction, update modifiers, recompute RSI)</span></div>
+            <div class="phase"><span class="phase-badge compute2">Phase 4</span><span class="phase-content"><strong>COMPUTE</strong> deltas + revenue (RSI delta → revenue_protected / revenue_eroded, churn events → revenue_saved / revenue_lost)</span></div>
           </div>
         </div>
 
@@ -250,7 +250,7 @@
             <li>Group interactions about the same problem</li>
             <li>Track issue lifecycle (open → resolved → abandoned)</li>
             <li>Detect false resolutions</li>
-            <li>Trigger BEI decay floor on resolution events</li>
+            <li>Trigger RSI decay floor on resolution events</li>
             <li>Track churn conversations as churn-typed issues</li>
           </ul>
         </div>
@@ -292,12 +292,12 @@
 
       <div class="rel-card">
         <div class="rel-card-title"><span class="rel-to-issue">Issue</span><span class="rel-arrow">→</span><span class="rel-to-customer">Customer Profile</span></div>
-        <div class="rel-card-body">Issues are owned by the customer. Issue-level friction (<span class="highlight-cyan">mean CFS per issue</span>, summed across issues) is a <span class="highlight-blue">BEI input</span>.</div>
+        <div class="rel-card-body">Issues are owned by the customer. Issue-level friction (<span class="highlight-cyan">mean CFS per issue</span>, summed across issues) is a <span class="highlight-blue">RSI input</span>.</div>
       </div>
 
       <div class="rel-card">
         <div class="rel-card-title"><span class="rel-from">Interaction</span><span class="rel-arrow">→</span><span class="rel-to-customer">Customer Profile</span></div>
-        <div class="rel-card-body">Reads current state before scoring, writes updated state after. <span class="highlight-blue">BEI delta</span> drives <span class="highlight-orange">revenue attribution</span>.</div>
+        <div class="rel-card-body">Reads current state before scoring, writes updated state after. <span class="highlight-blue">RSI delta</span> drives <span class="highlight-orange">revenue attribution</span>.</div>
       </div>
 
       <div class="rel-card">
@@ -312,7 +312,7 @@
       </div>
     </div>
 
-    <div class="version-tag">18 Feb 2026</div>
+    <div class="version-tag">Feb 2026</div>
   </div>
 
 <script>
