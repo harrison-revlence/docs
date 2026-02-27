@@ -51,9 +51,9 @@
   .phase-friction .phase-number{color:var(--indigo);background:var(--indigo-bg);border-color:var(--indigo-border);}
   .phase-mods .phase-number{color:var(--slate);background:var(--slate-bg);border-color:var(--slate-border);}
   .phase-churn .phase-number{color:var(--orange);background:var(--orange-bg);border-color:var(--orange-border);}
-  .phase-bei .phase-number{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-border);}
+  .phase-rsi .phase-number{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-border);}
   .phase-fin .phase-number{color:var(--green);background:var(--green-bg);border-color:var(--green-border);}
-  .phase-bei{border-color:var(--amber-border);box-shadow:0 2px 24px rgba(209,154,0,.09);}
+  .phase-rsi{border-color:var(--amber-border);box-shadow:0 2px 24px rgba(209,154,0,.09);}
   .flow-steps{display:flex;flex-direction:column;gap:10px;}
   .flow-step{display:flex;align-items:flex-start;gap:12px;font-size:13.5px;line-height:1.55;color:var(--text-dim);}
   .flow-step strong{color:var(--text);}
@@ -99,9 +99,9 @@
   .status-label{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;margin-bottom:4px;}
   .status-desc{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-dim);line-height:1.5;}
   .status-desc code{font-size:10px;background:var(--surface-3);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text);}
-  .bei-formula{border:1px solid var(--amber-border);border-radius:10px;padding:18px 20px;background:var(--amber-bg);margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);line-height:1.85;}
-  .bei-formula .k{color:var(--amber);font-weight:600;}
-  .bei-formula .c{color:var(--text-muted);font-style:italic;}
+  .rsi-formula{border:1px solid var(--amber-border);border-radius:10px;padding:18px 20px;background:var(--amber-bg);margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);line-height:1.85;}
+  .rsi-formula .k{color:var(--amber);font-weight:600;}
+  .rsi-formula .c{color:var(--text-muted);font-style:italic;}
   .stage-list{display:flex;flex-direction:column;gap:10px;margin:14px 0;}
   .stage-row{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--green-border);border-radius:10px;padding:14px 16px;background:var(--green-bg);}
   .stage-num{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);background:rgba(27,125,58,.1);border:1px solid var(--green-border);border-radius:6px;padding:3px 10px;margin-top:1px;white-space:nowrap;}
@@ -110,16 +110,18 @@
   .apex{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber);background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:6px;padding:2px 8px;}
   .stage-body{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);line-height:1.7;}
   .stage-body code{font-size:10.5px;background:var(--surface-3);border:1px solid var(--border);border-radius:3px;padding:1px 5px;color:var(--text);}
-  .sub-stages{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .sub-stages{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;}
   .sub-stage{border:1px solid var(--teal-border);border-radius:8px;padding:12px 14px;background:var(--teal-bg);}
   .sub-stage.red-sub{border-color:var(--red-border);background:var(--red-bg);}
   .sub-stage.oran-sub{border-color:var(--orange-border);background:var(--orange-bg);}
-  .sub-stage-title{font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;color:var(--teal);margin-bottom:4px;}
+  .sub-stage.slate-sub{border-color:var(--slate-border);background:var(--slate-bg);}
+  .sub-stage-title{font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;color:var(--teal);margin-bottom:4px;display:flex;align-items:center;gap:5px;}
   .sub-stage.red-sub .sub-stage-title{color:var(--red);}
   .sub-stage.oran-sub .sub-stage-title{color:var(--orange);}
+  .sub-stage.slate-sub .sub-stage-title{color:var(--slate);}
   .sub-stage-body{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-dim);line-height:1.55;}
   .sub-stage-body code{font-size:10px;background:var(--surface-3);border:1px solid var(--border);border-radius:3px;padding:1px 4px;color:var(--text);}
-  .churn-tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:5px;padding:1px 6px;margin-left:5px;vertical-align:middle;}
+  .churn-tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:5px;padding:1px 6px;}
   .optional-tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:6px;padding:2px 8px;margin-left:8px;vertical-align:middle;}
   .entry-node,.phase-card,.connector{opacity:0;transform:translateY(14px);animation:fadeUp .45s ease forwards;}
   .pipeline>:nth-child(1){animation-delay:.05s}.pipeline>:nth-child(2){animation-delay:.12s}.pipeline>:nth-child(3){animation-delay:.18s}.pipeline>:nth-child(4){animation-delay:.24s}.pipeline>:nth-child(5){animation-delay:.30s}.pipeline>:nth-child(6){animation-delay:.36s}.pipeline>:nth-child(7){animation-delay:.42s}.pipeline>:nth-child(8){animation-delay:.48s}.pipeline>:nth-child(9){animation-delay:.54s}.pipeline>:nth-child(10){animation-delay:.60s}.pipeline>:nth-child(11){animation-delay:.66s}.pipeline>:nth-child(12){animation-delay:.72s}.pipeline>:nth-child(13){animation-delay:.78s}.pipeline>:nth-child(14){animation-delay:.84s}
@@ -132,7 +134,7 @@
 <div class="header">
   <div class="header-label">Revlence · Quantify + Act Layers</div>
   <h1>Impact Scoring & Financial Attribution</h1>
-  <p>risk-revenue-spec · 26 Feb 2026</p>
+  <p>risk-revenue-spec · 27 Feb 2026</p>
 </div>
 
 <div class="pipeline">
@@ -147,7 +149,7 @@
           Normalised CCaaS + CRM metadata<br>
           <code>handling_mode</code> · <code>handle_time_seconds</code><br>
           <code>start_sentiment_label</code> · <code>end_sentiment_label</code><br>
-          Customer Profile snapshot incl. <code>bei_previous</code><br>
+          Customer Profile snapshot incl. <code>rsi_previous</code><br>
           Open issues within context window<br>
           Stream context (Tiers 1–2 resolved, or deferred flag)<br>
           <code>user_id</code> → <code>team_id</code> frozen at ingestion (CTS path)
@@ -178,13 +180,13 @@
   <div class="phase-card phase-scores">
     <div class="phase-number">Phase 1</div>
     <div class="phase-title">Interaction-Level Scores</div>
-    <div class="phase-subtitle">four scores per interaction · three feed BEI pipeline · CID is standalone</div>
+    <div class="phase-subtitle">four scores per interaction · three feed RSI pipeline · CID is standalone</div>
     <div class="card-divider"></div>
 
     <div class="scores-grid">
       <div class="score-box">
         <div class="score-box-title">Customer Friction Score (CFS)</div>
-        <div class="score-box-desc">Friction experienced by the customer on this interaction. Five-component weighted score. Written to the Interaction Object; feeds issue-level aggregation (Phase 2), which feeds BEI.</div>
+        <div class="score-box-desc">Friction experienced by the customer on this interaction. Five-component weighted score. Written to the Interaction Object; feeds issue-level aggregation (Phase 2), which feeds RSI.</div>
         <div class="score-box-formula">dissatisfaction · repeat_contact · time_effort · escalation · transfer → 0–1</div>
       </div>
       <div class="score-box">
@@ -194,18 +196,18 @@
       </div>
       <div class="score-box">
         <div class="score-box-title">Finality Alignment Score</div>
-        <div class="score-box-desc">Sub-score of Outcome Quality only. Did the closure state match what was required? Rewards appropriate follow-up endings. Does not flow to BEI directly.</div>
+        <div class="score-box-desc">Sub-score of Outcome Quality only. Did the closure state match what was required? Rewards appropriate follow-up endings. Does not flow to RSI directly.</div>
         <div class="score-box-formula">contact_resolution_status × issue_type context → 0–1</div>
       </div>
       <div class="score-box" style="border-color:rgba(123,63,160,.22);background:rgba(123,63,160,.05);">
         <div class="score-box-title" style="color:#7b3fa0;">Customer Intent Difficulty (CID)</div>
-        <div class="score-box-desc">Inherent complexity of the customer's issue, independent of handling quality. Does NOT feed BEI or friction aggregation. Exits to Agent Achievement and Intent Experience Matrix only.</div>
+        <div class="score-box-desc">Inherent complexity of the customer's issue, independent of handling quality. Does NOT feed RSI or friction aggregation. Exits to Agent Achievement and Intent Experience Matrix only.</div>
         <div class="score-box-formula">risk · complexity · dependency · emotion → 0–1 (standalone)</div>
       </div>
     </div>
 
     <div class="callout blue" style="margin-top:4px;">
-      CFS feeds Phase 2 friction aggregation. Outcome Quality feeds Phase 3 as a discount input. Finality Alignment feeds Outcome Quality only — never directly to BEI. CID exits the BEI pipeline entirely.
+      CFS feeds Phase 2 friction aggregation. Outcome Quality feeds Phase 3 as a discount input. Finality Alignment feeds Outcome Quality only — never directly to RSI. CID exits the RSI pipeline entirely.
     </div>
   </div>
 
@@ -219,12 +221,12 @@
   <div class="phase-card phase-friction">
     <div class="phase-number">Phase 2</div>
     <div class="phase-title">Issue-Level Friction Aggregation</div>
-    <div class="phase-subtitle">interaction CFS scores aggregated across open issues on the Customer Profile → primary BEI input</div>
+    <div class="phase-subtitle">interaction CFS scores aggregated across open issues on the Customer Profile → primary RSI input</div>
     <div class="card-divider"></div>
 
     <div class="flow-step" style="margin-bottom:14px;">
       <span class="badge indigo">Compute</span>
-      <span><strong>issue_friction_total</strong> — primary friction input to BEI. Sub-computation of BEI, not an independent apex score. Friction is anchored on issues: CFS accumulates per-issue, then issues sum to the customer-level total.</span>
+      <span><strong>issue_friction_total</strong> — primary friction input to RSI. Sub-computation of RSI, not an independent apex score. Friction is anchored on issues: CFS accumulates per-issue, then issues sum to the customer-level total.</span>
     </div>
 
     <div style="border:1px solid var(--indigo-border);border-radius:10px;padding:16px 20px;background:var(--indigo-bg);">
@@ -236,7 +238,7 @@
         </div>
         <div class="status-box" style="border-color:var(--green-d-border);background:var(--green-d-bg);">
           <div class="status-label" style="color:var(--green-d);">RESOLVED</div>
-          <div class="status-desc">Contributes zero to <code>issue_friction_total</code>. BEI decay floor handles residual exposure — see Phase 5.</div>
+          <div class="status-desc">Contributes zero to <code>issue_friction_total</code>. RSI decay floor handles residual exposure — see Phase 5.</div>
         </div>
         <div class="status-box" style="border-color:var(--amber-border);background:var(--amber-bg);">
           <div class="status-label" style="color:var(--amber);">ABANDONED</div>
@@ -275,13 +277,13 @@
         <div class="mod-item"><code>escalation_sensitivity</code> — where escalation went. Supervisor 0.33 · Complaints 0.66 · Legal 1.00. Composite weight: 0.15</div>
         <div class="mod-item"><code>duration_norm</code> — how long the issue has been open, normalised 0–1 with configurable cap. Composite weight: 0.25</div>
         <div class="mod-item"><code>urgency</code> — Low 0.30 · Medium 0.60 · High 0.90. Composite weight: 0.15</div>
-        <div class="mod-item"><code>promotion_risk_modifier</code> — applied at BEI level when a promotion is active (default 1.25×). Not part of amplifier_composite.</div>
+        <div class="mod-item"><code>promotion_risk_modifier</code> — applied at RSI level when a promotion is active (default 1.25×). Not part of amplifier_composite.</div>
       </div>
       <div class="mod-box disc">
         <div class="mod-box-title">↓ Discounts — reduce exposure</div>
         <div class="mod-item"><code>outcome_discount</code> — max 40% reduction. Consumes <code>outcome_quality_score</code> from Phase 1 directly. One construct, scored once, discounted once.</div>
         <div class="mod-item"><code>sentiment_discount</code> — max 20% reduction. Fires only when sentiment improved. Derived as <code>positive_sentiment_shift</code> from the start → end sentiment label pair.</div>
-        <div class="mod-item">Discounts are <strong>multiplicative</strong>, not additive. Max combined reduction: 52% (0.60 × 0.80). Discounts alone cannot reduce BEI to zero.</div>
+        <div class="mod-item">Discounts are <strong>multiplicative</strong>, not additive. Max combined reduction: 52% (0.60 × 0.80). Discounts alone cannot reduce RSI to zero.</div>
       </div>
     </div>
 
@@ -302,7 +304,7 @@
   <div class="phase-card phase-churn">
     <div class="phase-number">Phase 4 <span class="optional-tag">Optional Module</span></div>
     <div class="phase-title">Churn Intent Probability</div>
-    <div class="phase-subtitle">expressed conversational intent · not behavioural prediction · third BEI input when active</div>
+    <div class="phase-subtitle">expressed conversational intent · not behavioural prediction · third RSI input when active</div>
     <div class="card-divider"></div>
 
     <div class="flow-steps">
@@ -321,47 +323,50 @@
     </div>
 
     <div class="callout orange" style="margin-top:14px;">
-      When the churn module is active and a churn signal is present, churn_intent_probability becomes the third BEI input. BEI is fully meaningful without it — churn adds precision, not a requirement.
+      When the churn module is active and a churn signal is present, churn_intent_probability becomes the third RSI input. RSI is fully meaningful without it — churn adds precision, not a requirement.
     </div>
   </div>
 
   <div class="connector">
     <div class="connector-stem"></div>
-    <div class="connector-tag amber">↓ All BEI inputs assembled</div>
+    <div class="connector-tag amber">↓ All RSI inputs assembled</div>
     <div class="connector-stem"></div>
   </div>
 
-  <!-- PHASE 5: BEI -->
-  <div class="phase-card phase-bei">
+  <!-- PHASE 5: RSI -->
+  <div class="phase-card phase-rsi">
     <div class="phase-number">Phase 5</div>
-    <div class="phase-title">Business Exposure Index (BEI)</div>
-    <div class="phase-subtitle">0–1 · "how exposed is the business to losing this customer's revenue right now?" · persistent on Customer Profile</div>
+    <div class="phase-title">Relationship Stress Index (RSI)</div>
+    <div class="phase-subtitle">0–1 internal / 0–100 reported · "how much stress has accumulated on this commercial relationship?" · persistent on Customer Profile</div>
     <div class="card-divider"></div>
 
-    <div class="bei-formula">
+    <div class="rsi-formula">
       <span class="c">-- Standard path (churn module off or no churn signal):</span><br>
       friction_with_modifiers = (issue_friction_total + amplifier_composite) × discount_composite<br>
-      <span class="k">BEI = clamp(friction_with_modifiers, 0, 1)</span><br><br>
+      <span class="k">RSI = clamp(friction_with_modifiers, 0, 1)</span><br><br>
       <span class="c">-- Churn module active AND churn_intent_probability present:</span><br>
       max_signal = max(friction_with_modifiers, churn_intent_probability)<br>
       min_signal = min(friction_with_modifiers, churn_intent_probability)<br>
-      <span class="k">BEI = clamp(max_signal + blend_weight × min_signal, 0, 1)</span><br>
-      <span class="c">-- blend_weight default 0.25 · calibration pending</span><br><br>
-      <span class="c">-- Promotion amplification (applied after composition, at Stage 2):</span><br>
-      <span class="k">amplified_BEI = clamp(BEI × promotion_risk_modifier, 0, 1)</span><br><br>
+      <span class="k">RSI = clamp(max_signal + blend_weight × min_signal, 0, 1)</span><br>
+      <span class="c">-- blend_weight default 0.25 · calibration pending</span><br>
+      <span class="c">-- max() ensures neither signal dilutes the other · blend adds bonus when both elevated</span><br><br>
+      <span class="c">-- Promotion amplification (applied after composition, at Stage 2 of Financial Attribution):</span><br>
+      <span class="k">amplified_rsi = clamp(RSI × promotion_risk_modifier, 0, 1)</span><br><br>
       <span class="c">-- Decay floor (prevents cliff-drop on issue resolution):</span><br>
-      bei_floor = floor_rate × bei_at_resolution  <span class="c">(floor_rate default 0.15)</span><br>
-      <span class="c">-- Decays linearly from bei_floor to 0 over bei_floor_decay_window (= context_window × 2.0)</span>
+      rsi_floor = floor_rate × rsi_at_resolution  <span class="c">(floor_rate default 0.15)</span><br>
+      <span class="c">-- Decays linearly from rsi_floor to 0 over rsi_floor_decay_window (= context_window × 2.0)</span><br><br>
+      <span class="c">-- Reporting transform (display only — all internal formulas operate on 0–1):</span><br>
+      <span class="k">rsi_display = round(rsi_score × 100, 1)</span>
     </div>
 
     <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-dim);line-height:1.7;margin-top:4px;">
-      BEI lives on the <strong>Customer Profile Object</strong> — persistent, updated after each interaction. <code>bei_previous</code> is snapshotted before processing and stored on the Interaction Object alongside <code>bei_new</code>. <code>bei_delta = bei_previous − bei_new</code> is a first-class reportable field: positive = risk reduced, negative = risk increased.
+      RSI lives on the <strong>Customer Profile Object</strong> — persistent, updated after each interaction. <code>rsi_previous</code> is snapshotted before processing and stored on the Interaction Object alongside <code>rsi_new</code>. <code>rsi_delta = rsi_previous − rsi_new</code> is a first-class reportable field: positive = stress reduced, negative = stress increased.
     </div>
   </div>
 
   <div class="connector">
     <div class="connector-stem"></div>
-    <div class="connector-tag green">↓ BEI written to Customer Profile · Financial Attribution begins</div>
+    <div class="connector-tag green">↓ RSI written to Customer Profile · Financial Attribution begins</div>
     <div class="connector-stem"></div>
   </div>
 
@@ -369,7 +374,7 @@
   <div class="phase-card phase-fin">
     <div class="phase-number">Phase 6</div>
     <div class="phase-title">Financial Attribution</div>
-    <div class="phase-subtitle">four-stage chain · anchored on resolved_cltv × BEI · all outputs stored on Interaction Object</div>
+    <div class="phase-subtitle">five-stage chain · anchored on resolved_cltv × RSI · all outputs stored on Interaction Object</div>
     <div class="card-divider"></div>
 
     <div class="stage-list">
@@ -379,7 +384,7 @@
         <div class="stage-content">
           <div class="stage-title">Resolved Customer Lifetime Value</div>
           <div class="stage-body">
-            <strong>resolved_sltv</strong> — already computed wherever stream resolution completed (Smart Ingestion Tiers 1–2, or CID Tiers 3–4 if deferred). Already stored on the Interaction Object. Available here.<br><br>
+            <strong>resolved_sltv</strong> — already computed wherever stream resolution completed (Smart Ingestion Tiers 1–2, or Customer Impact Discovery Tiers 3–4 if deferred). Already stored on the Interaction Object. Available here.<br><br>
             <strong>resolved_cltv</strong> — customer-level value anchor for all downstream calculations.<br>
             Path A: <code>customer_cltv</code> from CRM metadata — used directly if present.<br>
             Path B cascade: <code>customer_metrics</code> → <code>blended_metrics</code> → stream average (<code>resolved_sltv</code>).<br>
@@ -393,10 +398,11 @@
         <div class="stage-content">
           <div class="stage-title">Resolved Revenue at Risk <span class="apex">Customer-Level Apex</span></div>
           <div class="stage-body">
-            <strong>revenue_at_risk</strong> (internal): <code>resolved_cltv × bei_score</code>. When promotion active: <code>resolved_cltv × amplified_BEI</code> where <code>amplified_BEI = clamp(bei × promotion_risk_modifier, 0, 1)</code>.<br>
+            <strong>revenue_at_risk</strong> (internal): <code>resolved_cltv × rsi_score</code>. When promotion active: <code>resolved_cltv × amplified_rsi</code> where <code>amplified_rsi = clamp(rsi_score × promotion_risk_modifier, 0, 1)</code>.<br>
             Exception: <code>churn_outcome = not_retained</code> → <code>revenue_at_risk = 0</code> (revenue is lost, no longer at risk).<br><br>
             <strong>resolved_revenue_at_risk</strong> (terminal, surfaces in dashboards): <code>revenue_at_risk − promotion_financial_subtraction</code> if configured, else equals <code>revenue_at_risk</code>.<br>
-            Written back to Customer Profile after each interaction. Read as <code>resolved_revenue_at_risk_previous</code> at the start of the next interaction's attribution.
+            Written back to Customer Profile after each interaction. Read as <code>resolved_revenue_at_risk_previous</code> at the start of the next interaction's attribution.<br><br>
+            <strong>resolved_revenue_secure</strong> (Customer Profile field): <code>resolved_cltv − resolved_revenue_at_risk</code>. The dollar value of this customer's lifetime value not currently at risk. Computed and written to Customer Profile after <code>resolved_revenue_at_risk</code> resolves. Used for dashboard reporting.
           </div>
         </div>
       </div>
@@ -418,11 +424,15 @@
     </div>
 
     <div style="border:1px solid var(--teal-border);border-radius:10px;padding:18px 20px;background:var(--teal-bg);margin-top:10px;">
-      <div class="section-label teal">Stage 4 — Sub-Scores</div>
+      <div class="section-label teal">Stage 4 — Sub-Scores (Six Revenue Dimensions)</div>
       <div class="sub-stages">
         <div class="sub-stage">
           <div class="sub-stage-title">revenue_protected</div>
-          <div class="sub-stage-body">Always computed. Gross delta component of NCD — what NCD would be before CTS is subtracted.<br><code>max(prev − new, 0)</code></div>
+          <div class="sub-stage-body">Always computed. Gross positive delta — risk reduced on this interaction.<br><code>max(prev − new, 0)</code></div>
+        </div>
+        <div class="sub-stage slate-sub">
+          <div class="sub-stage-title">revenue_eroded</div>
+          <div class="sub-stage-body">Always computed. Gross negative delta — risk increased on this interaction.<br><code>max(new − prev, 0)</code></div>
         </div>
         <div class="sub-stage oran-sub">
           <div class="sub-stage-title">revenue_saved <span class="churn-tag">Churn</span></div>
@@ -430,16 +440,31 @@
         </div>
         <div class="sub-stage red-sub">
           <div class="sub-stage-title">revenue_lost <span class="churn-tag">Churn</span></div>
-          <div class="sub-stage-body"><code>resolved_cltv</code> when <code>churn_outcome = not_retained</code>. Also triggers Stage 2 zeroing of <code>revenue_at_risk</code>.</div>
+          <div class="sub-stage-body"><code>resolved_cltv</code> when <code>churn_outcome = not_retained</code>. Also triggers Stage 2 zeroing of <code>resolved_revenue_at_risk</code> and <code>resolved_cltv</code> on the Customer Profile.</div>
         </div>
       </div>
       <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--teal);line-height:1.6;">
-        Presentation rule: revenue_protected and revenue_saved are mutually exclusive per interaction at the visualisation layer. Revenue Protected is a Stage 3 gross delta sub-score; Revenue Saved is a churn module event metric. Different types — never summed.
+        revenue_protected and revenue_eroded are mutually exclusive per interaction — exposure either improved or worsened, never both. revenue_protected and revenue_saved are mutually exclusive at the visualisation layer — different types, never summed. Two further dimensions (revenue_secured · revenue_gained) are Growth Module placeholders for v2+.
+      </div>
+    </div>
+
+    <div style="border:1px solid var(--green-border);border-radius:10px;padding:18px 20px;background:var(--green-bg);margin-top:10px;">
+      <div class="section-label green">Stage 5 — Portfolio Revenue Rollup</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);line-height:1.85;">
+        <span style="color:var(--green);font-weight:600;">portfolio_revenue_at_risk</span>  = SUM(resolved_revenue_at_risk)  <span style="color:var(--text-muted);font-style:italic;">-- primary RSR input · total exposure across all customers in scope</span><br>
+        <span style="color:var(--green);font-weight:600;">portfolio_cltv</span>              = SUM(resolved_cltv)              <span style="color:var(--text-muted);font-style:italic;">-- RSR denominator · total portfolio lifetime value</span><br>
+        portfolio_revenue_secure     = portfolio_cltv − portfolio_revenue_at_risk  <span style="color:var(--text-muted);font-style:italic;">-- dashboard display only · not an RSR input</span><br><br>
+        portfolio_revenue_protected  = SUM(revenue_protected)  <span style="color:var(--text-muted);font-style:italic;">-- total friction-based risk reduction in period</span><br>
+        portfolio_revenue_eroded     = SUM(revenue_eroded)      <span style="color:var(--text-muted);font-style:italic;">-- total friction-based risk increase in period</span><br>
+        portfolio_revenue_saved      = SUM(revenue_saved)       <span style="color:var(--text-muted);font-style:italic;">[CHURN MODULE] total churn saves</span><br>
+        portfolio_revenue_lost       = SUM(revenue_lost)        <span style="color:var(--text-muted);font-style:italic;">[CHURN MODULE] total churn losses</span><br><br>
+        <span style="color:var(--text-muted);font-style:italic;">-- Customers without resolved_cltv excluded from both numerator and denominator.</span><br>
+        portfolio_coverage_rate = customers_with_resolved_cltv / total_customers  <span style="color:var(--text-muted);font-style:italic;">-- governance signal</span>
       </div>
     </div>
 
     <div class="callout green" style="margin-top:14px;">
-      ✓ All revenue fields written to Interaction Object. Customer Profile updated: resolved_revenue_at_risk (new state) · cts_total (running total). Outputs available to Performance Management.
+      ✓ All revenue fields written to Interaction Object. Customer Profile updated: resolved_revenue_at_risk · resolved_revenue_secure (new) · cts_total (running total). Stage 5 portfolio aggregates are the direct inputs to RSR. Outputs available to Performance Management.
     </div>
   </div>
 
@@ -449,11 +474,11 @@
     <div class="connector-stem"></div>
   </div>
 
-  <!-- PHASE 7: PERFORMANCE MANAGEMENT -->
+  <!-- PHASE 7: PERFORMANCE MANAGEMENT + AII -->
   <div class="phase-card phase-perf" style="border-color:rgba(123,63,160,.25);box-shadow:0 2px 20px rgba(123,63,160,.06);">
     <div class="phase-number" style="color:#7b3fa0;background:rgba(123,63,160,.07);border-color:rgba(123,63,160,.22);">Phase 7</div>
     <div class="phase-title">Performance Management</div>
-    <div class="phase-subtitle">agent-level outputs · powered by interaction and financial data · feeds indices in Phase 8</div>
+    <div class="phase-subtitle">agent-level outputs · powered by interaction and financial data · composite AII produced as phase output</div>
     <div class="card-divider"></div>
 
     <div class="scores-grid">
@@ -479,85 +504,71 @@
       </div>
     </div>
 
-    <div class="callout" style="margin-top:4px;border:1px solid rgba(123,63,160,.2);background:rgba(123,63,160,.05);color:#7b3fa0;">
-      Agent Achievement Efficiency is a sub-score of Agent Achievement — it adjusts the achievement score for cost. Interaction Quality and Agent Commercial Impact are independent scores, not sub-scores. All four feed Phase 8 indices.
+    <div style="border:1px solid rgba(123,63,160,.22);border-radius:10px;padding:14px 16px;background:rgba(123,63,160,.05);margin-top:14px;">
+      <div style="font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;color:#7b3fa0;margin-bottom:6px;">Agent Impact Index (AII) — Phase Output</div>
+      <div style="font-size:12px;color:var(--text-dim);line-height:1.55;margin-bottom:6px;">Composite index synthesising Agent Achievement, Interaction Quality, and Agent Commercial Impact. The single-number answer to "how impactful was this agent on this interaction?" Reported per-interaction and rolled up to agent-level over time.</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-muted);">Agent Achievement · Interaction Quality · Agent Commercial Impact → AII 0–1</div>
+    </div>
+
+    <div class="callout" style="margin-top:10px;border:1px solid rgba(123,63,160,.2);background:rgba(123,63,160,.05);color:#7b3fa0;">
+      Agent Achievement Efficiency is a sub-score of Agent Achievement. Interaction Quality and Agent Commercial Impact are independent scores. AII is the composite output of this phase — not a separate stage. RSR is the portfolio-level apex and reads directly from Financial Attribution Stage 5, not from AII.
     </div>
   </div>
 
   <div class="connector">
     <div class="connector-stem"></div>
-    <div class="connector-tag" style="color:#b07d00;background:rgba(176,125,0,.06);border-color:rgba(176,125,0,.22);">↓ Performance scores computed · Indices begin</div>
+    <div class="connector-tag" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">↓ AII computed · Portfolio apex</div>
     <div class="connector-stem"></div>
   </div>
 
-  <!-- PHASE 8: INDICES -->
-  <div class="phase-card" style="border-color:rgba(176,125,0,.25);box-shadow:0 2px 20px rgba(176,125,0,.07);">
-    <div class="phase-number" style="color:#b07d00;background:rgba(176,125,0,.07);border-color:rgba(176,125,0,.22);">Phase 8</div>
-    <div class="phase-title">Impact Scores</div>
-    <div class="phase-subtitle">two composite scores · agent-level and customer-level · both feed the apex CII in Phase 9</div>
-    <div class="card-divider"></div>
-
-    <div class="scores-grid">
-      <div class="score-box" style="border-color:rgba(123,63,160,.22);background:rgba(123,63,160,.05);">
-        <div class="score-box-title" style="color:#7b3fa0;">Agent Impact Index (AII)</div>
-        <div class="score-box-desc">Composite agent-level index. Synthesises three Performance Management outputs: Agent Achievement, Interaction Quality, and Agent Commercial Impact. The single-number answer to "how impactful was this agent on this interaction?"</div>
-        <div class="score-box-formula">Powered by Performance Management → 0–1 composite index</div>
-      </div>
-      <div class="score-box" style="border-color:rgba(176,125,0,.22);background:rgba(176,125,0,.05);">
-        <div class="score-box-title" style="color:#b07d00;">Customer Impact Score (CIS)</div>
-        <div class="score-box-desc">Measures the cumulative impact of all interactions on this customer relationship within the context window — combining risk trajectory (BEI delta), net commercial outcome (NCD), revenue event history, and friction load (CFS). Built from per-interaction IIS values but reported and governed at the customer level.</div>
-        <div class="score-box-formula">BEI delta · NCD · revenue events · CFS aggregated per customer → customer-level 0–1</div>
-      </div>
-    </div>
-
-    <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-dim);line-height:1.7;">
-      AII and CIS operate at different scopes: <strong>AII</strong> is per-interaction, per-agent; <strong>CIS</strong> is per-customer, accumulating across all interactions within the context window. Both roll into the portfolio-level CII in Phase 9.
-    </div>
-  </div>
-
-  <div class="connector">
-    <div class="connector-stem"></div>
-    <div class="connector-tag" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">↓ AII + CIS computed · Portfolio apex</div>
-    <div class="connector-stem"></div>
-  </div>
-
-  <!-- PHASE 9: CII APEX -->
+  <!-- PHASE 9: RSR APEX -->
   <div class="phase-card" style="border-color:rgba(180,30,30,.28);box-shadow:0 4px 32px rgba(180,30,30,.10);">
-    <div class="phase-number" style="color:#b41e1e;background:rgba(180,30,30,.07);border-color:rgba(180,30,30,.22);">Phase 9</div>
-    <div class="phase-title">Customer Impact Index (CII) <span style="font-family:'JetBrains Mono';font-size:10px;font-weight:700;letter-spacing:1px;color:#b41e1e;background:rgba(180,30,30,.08);border:1px solid rgba(180,30,30,.22);border-radius:6px;padding:2px 10px;margin-left:10px;vertical-align:middle;">Apex · Board-Level</span></div>
-    <div class="phase-subtitle">all customers · all streams · all risk profiles · governed, revenue-aligned replacement for NPS</div>
+    <div class="phase-number" style="color:#b41e1e;background:rgba(180,30,30,.07);border-color:rgba(180,30,30,.22);">Phase 8</div>
+    <div class="phase-title">Relationship Strength Rating (RSR) <span style="font-family:'JetBrains Mono';font-size:10px;font-weight:700;letter-spacing:1px;color:#b41e1e;background:rgba(180,30,30,.08);border:1px solid rgba(180,30,30,.22);border-radius:6px;padding:2px 10px;margin-left:10px;vertical-align:middle;">Apex · Board-Level</span></div>
+    <div class="phase-subtitle">0–100 · computed daily · proportion of total portfolio value not currently at risk · governed replacement for NPS</div>
     <div class="card-divider"></div>
 
     <div style="border:1px solid rgba(180,30,30,.22);border-radius:10px;padding:18px 20px;background:rgba(180,30,30,.04);margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);line-height:1.85;">
-      <span style="color:#b41e1e;font-weight:600;">CII</span> = aggregation of <span style="color:#b07d00;">CIS</span> across all customers,<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;weighted by <span style="color:var(--amber);">BEI</span> (risk exposure) and <span style="color:var(--green);">resolved_cltv</span> (revenue weight),<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;segmented across all streams and risk profiles<br>
-      <span style="color:var(--text-muted);font-style:italic;">-- Composition formula and weights: specification pending</span>
+      <span style="color:#b41e1e;font-weight:600;">-- Step 1: Portfolio state aggregation (from Financial Attribution Stage 5)</span><br>
+      portfolio_revenue_at_risk  = SUM(resolved_revenue_at_risk)  <span style="color:var(--text-muted);font-style:italic;">-- primary RSR input</span><br>
+      portfolio_cltv             = SUM(resolved_cltv)              <span style="color:var(--text-muted);font-style:italic;">-- RSR denominator</span><br><br>
+      <span style="color:#b41e1e;font-weight:600;">-- Step 2: RSR snapshot (computed daily)</span><br>
+      <span style="color:#b41e1e;font-weight:600;">RSR = (1 − portfolio_revenue_at_risk / portfolio_cltv) × 100</span><br><br>
+      <span style="color:var(--text-muted);font-style:italic;">-- RSR = 74 means 74% of total portfolio value is not currently at risk. 26% is exposed.</span><br>
+      <span style="color:var(--text-muted);font-style:italic;">-- RSR = 100: no revenue at risk. RSR = 0: entire portfolio exposed.</span><br>
+      <span style="color:var(--text-muted);font-style:italic;">-- Scale-invariant: risk profile drives the score, not portfolio size.</span><br><br>
+      <span style="color:#b41e1e;font-weight:600;">-- Step 3: Delta lines (reportable)</span><br>
+      RSR_delta                       = RSR_today − RSR_yesterday<br>
+      portfolio_revenue_at_risk_delta = portfolio_revenue_at_risk_today − portfolio_revenue_at_risk_yesterday<br>
+      portfolio_revenue_protected     = SUM(revenue_protected)<br>
+      portfolio_revenue_eroded        = SUM(revenue_eroded)<br>
+      portfolio_revenue_saved         = SUM(revenue_saved)  <span style="color:var(--text-muted);font-style:italic;">[CHURN MODULE]</span><br>
+      portfolio_revenue_lost          = SUM(revenue_lost)   <span style="color:var(--text-muted);font-style:italic;">[CHURN MODULE]</span>
     </div>
 
     <div class="flow-steps">
       <div class="flow-step">
         <span class="badge" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">NPS Replacement</span>
-        <span>CII occupies the same board-level reporting slot as NPS but is computed continuously from real interaction data rather than collected via survey at low frequency. A single number that moves in response to actual customer outcomes, with full causal traceability into which streams, issue types, risk profiles, and agent behaviours are driving it.</span>
+        <span>RSR occupies the same board-level reporting slot as NPS but is computed daily from real interaction data rather than collected via survey at low frequency. A single number that moves in response to actual customer outcomes, with full causal traceability into which streams, issue types, risk profiles, and agent behaviours are driving it.</span>
       </div>
       <div class="flow-step">
         <span class="badge" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">Traceability</span>
-        <span>Every CII movement is explainable bottom-up: CII shifts because CIS shifted for specific customers, because IIS shifted on specific interactions, because BEI or NCD moved, because of specific issue types, agents, or friction patterns. No survey lag, no sample bias, no black box.</span>
+        <span>Every RSR movement is explainable bottom-up: RSR shifts because <code>portfolio_revenue_at_risk</code> shifted, because <code>resolved_revenue_at_risk</code> shifted for specific customers, because RSI moved, because of specific issue types, agents, or friction patterns. No survey lag, no sample bias, no black box.</span>
       </div>
       <div class="flow-step">
         <span class="badge" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">Revenue Weighting</span>
-        <span>Unlike NPS, CII weights each customer by <code>resolved_cltv</code> and their current <code>BEI</code>. A deteriorating high-value customer at high risk moves CII more than a stable low-value customer. The index reflects commercial exposure, not just volume of dissatisfaction.</span>
+        <span>Unlike NPS, RSR is anchored on <code>resolved_cltv</code> — what each customer is actually worth. A deteriorating high-value customer with high RSI contributes more to <code>portfolio_revenue_at_risk</code> and therefore moves RSR more than a stable low-value customer. The score reflects commercial exposure, not just volume of dissatisfaction.</span>
       </div>
     </div>
 
     <div class="callout" style="margin-top:14px;border:1px solid rgba(180,30,30,.2);background:rgba(180,30,30,.05);color:#b41e1e;">
-      ✓ Pipeline complete. Every metric from agent performance to portfolio health is traceable through the full chain back to the raw interaction transcript and CRM metadata ingested at Phase 0.
+      ✓ Pipeline complete. Full dependency chain: CFS → RSI → resolved_revenue_at_risk → portfolio aggregation → RSR. Every metric from agent performance to portfolio health is traceable through the full chain back to the raw interaction transcript and CRM metadata ingested at Phase 0.
     </div>
   </div>
 
 </div>
 
-<div class="version-tag">risk-revenue-spec · 26 Feb 2026</div>
+<div class="version-tag">risk-revenue-spec · 27 Feb 2026</div>
 
 </body>
 </html>
