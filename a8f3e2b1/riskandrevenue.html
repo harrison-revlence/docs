@@ -451,9 +451,9 @@
     <div style="border:1px solid var(--green-border);border-radius:10px;padding:18px 20px;background:var(--green-bg);margin-top:10px;">
       <div class="section-label green">Stage 5 — Portfolio Revenue Rollup</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);line-height:1.85;">
-        <span style="color:var(--green);font-weight:600;">portfolio_revenue_at_risk</span>  = SUM(resolved_revenue_at_risk)  <span style="color:var(--text-muted);font-style:italic;">-- primary RSR input · total exposure across all customers in scope</span><br>
-        <span style="color:var(--green);font-weight:600;">portfolio_cltv</span>              = SUM(resolved_cltv)              <span style="color:var(--text-muted);font-style:italic;">-- RSR denominator · total portfolio lifetime value</span><br>
-        portfolio_revenue_secure     = portfolio_cltv − portfolio_revenue_at_risk  <span style="color:var(--text-muted);font-style:italic;">-- dashboard display only · not an RSR input</span><br><br>
+        <span style="color:var(--green);font-weight:600;">portfolio_revenue_at_risk</span>  = SUM(resolved_revenue_at_risk)  <span style="color:var(--text-muted);font-style:italic;">-- primary EVI input · total exposure across all customers in scope</span><br>
+        <span style="color:var(--green);font-weight:600;">portfolio_cltv</span>              = SUM(resolved_cltv)              <span style="color:var(--text-muted);font-style:italic;">-- EVI denominator · total portfolio lifetime value</span><br>
+        portfolio_revenue_secure     = portfolio_cltv − portfolio_revenue_at_risk  <span style="color:var(--text-muted);font-style:italic;">-- dashboard display only · not an EVI input</span><br><br>
         portfolio_revenue_protected  = SUM(revenue_protected)  <span style="color:var(--text-muted);font-style:italic;">-- total friction-based risk reduction in period</span><br>
         portfolio_revenue_eroded     = SUM(revenue_eroded)      <span style="color:var(--text-muted);font-style:italic;">-- total friction-based risk increase in period</span><br>
         portfolio_revenue_saved      = SUM(revenue_saved)       <span style="color:var(--text-muted);font-style:italic;">[CHURN MODULE] total churn saves</span><br>
@@ -464,7 +464,7 @@
     </div>
 
     <div class="callout green" style="margin-top:14px;">
-      ✓ All revenue fields written to Interaction Object. Customer Profile updated: resolved_revenue_at_risk · resolved_revenue_secure (new) · cts_total (running total). Stage 5 portfolio aggregates are the direct inputs to RSR. Outputs available to Performance Management.
+      ✓ All revenue fields written to Interaction Object. Customer Profile updated: resolved_revenue_at_risk · resolved_revenue_secure (new) · cts_total (running total). Stage 5 portfolio aggregates are the direct inputs to EVI. Outputs available to Performance Management.
     </div>
   </div>
 
@@ -511,7 +511,7 @@
     </div>
 
     <div class="callout" style="margin-top:10px;border:1px solid rgba(123,63,160,.2);background:rgba(123,63,160,.05);color:#7b3fa0;">
-      Agent Achievement Efficiency is a sub-score of Agent Achievement. Interaction Quality and Agent Commercial Impact are independent scores. AII is the composite output of this phase — not a separate stage. RSR is the portfolio-level apex and reads directly from Financial Attribution Stage 5, not from AII.
+      Agent Achievement Efficiency is a sub-score of Agent Achievement. Interaction Quality and Agent Commercial Impact are independent scores. AII is the composite output of this phase — not a separate stage. EVI is the portfolio-level apex and reads directly from Financial Attribution Stage 5, not from AII.
     </div>
   </div>
 
@@ -521,24 +521,24 @@
     <div class="connector-stem"></div>
   </div>
 
-  <!-- PHASE 9: RSR APEX -->
+  <!-- PHASE 8: EVI APEX -->
   <div class="phase-card" style="border-color:rgba(180,30,30,.28);box-shadow:0 4px 32px rgba(180,30,30,.10);">
     <div class="phase-number" style="color:#b41e1e;background:rgba(180,30,30,.07);border-color:rgba(180,30,30,.22);">Phase 8</div>
-    <div class="phase-title">Relationship Strength Rating (RSR) <span style="font-family:'JetBrains Mono';font-size:10px;font-weight:700;letter-spacing:1px;color:#b41e1e;background:rgba(180,30,30,.08);border:1px solid rgba(180,30,30,.22);border-radius:6px;padding:2px 10px;margin-left:10px;vertical-align:middle;">Apex · Board-Level</span></div>
+    <div class="phase-title">Experience Value Index (EVI) <span style="font-family:'JetBrains Mono';font-size:10px;font-weight:700;letter-spacing:1px;color:#b41e1e;background:rgba(180,30,30,.08);border:1px solid rgba(180,30,30,.22);border-radius:6px;padding:2px 10px;margin-left:10px;vertical-align:middle;">Apex · Board-Level</span></div>
     <div class="phase-subtitle">0–100 · computed daily · proportion of total portfolio value not currently at risk · governed replacement for NPS</div>
     <div class="card-divider"></div>
 
     <div style="border:1px solid rgba(180,30,30,.22);border-radius:10px;padding:18px 20px;background:rgba(180,30,30,.04);margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);line-height:1.85;">
       <span style="color:#b41e1e;font-weight:600;">-- Step 1: Portfolio state aggregation (from Financial Attribution Stage 5)</span><br>
-      portfolio_revenue_at_risk  = SUM(resolved_revenue_at_risk)  <span style="color:var(--text-muted);font-style:italic;">-- primary RSR input</span><br>
-      portfolio_cltv             = SUM(resolved_cltv)              <span style="color:var(--text-muted);font-style:italic;">-- RSR denominator</span><br><br>
-      <span style="color:#b41e1e;font-weight:600;">-- Step 2: RSR snapshot (computed daily)</span><br>
-      <span style="color:#b41e1e;font-weight:600;">RSR = (1 − portfolio_revenue_at_risk / portfolio_cltv) × 100</span><br><br>
-      <span style="color:var(--text-muted);font-style:italic;">-- RSR = 74 means 74% of total portfolio value is not currently at risk. 26% is exposed.</span><br>
-      <span style="color:var(--text-muted);font-style:italic;">-- RSR = 100: no revenue at risk. RSR = 0: entire portfolio exposed.</span><br>
+      portfolio_revenue_at_risk  = SUM(resolved_revenue_at_risk)  <span style="color:var(--text-muted);font-style:italic;">-- primary EVI input</span><br>
+      portfolio_cltv             = SUM(resolved_cltv)              <span style="color:var(--text-muted);font-style:italic;">-- EVI denominator</span><br><br>
+      <span style="color:#b41e1e;font-weight:600;">-- Step 2: EVI snapshot (computed daily)</span><br>
+      <span style="color:#b41e1e;font-weight:600;">EVI = (1 − portfolio_revenue_at_risk / portfolio_cltv) × 100</span><br><br>
+      <span style="color:var(--text-muted);font-style:italic;">-- EVI = 74 means 74% of total portfolio value is not currently at risk. 26% is exposed.</span><br>
+      <span style="color:var(--text-muted);font-style:italic;">-- EVI = 100: no revenue at risk. EVI = 0: entire portfolio exposed.</span><br>
       <span style="color:var(--text-muted);font-style:italic;">-- Scale-invariant: risk profile drives the score, not portfolio size.</span><br><br>
       <span style="color:#b41e1e;font-weight:600;">-- Step 3: Delta lines (reportable)</span><br>
-      RSR_delta                       = RSR_today − RSR_yesterday<br>
+      EVI_delta                       = EVI_today − EVI_yesterday<br>
       portfolio_revenue_at_risk_delta = portfolio_revenue_at_risk_today − portfolio_revenue_at_risk_yesterday<br>
       portfolio_revenue_protected     = SUM(revenue_protected)<br>
       portfolio_revenue_eroded        = SUM(revenue_eroded)<br>
@@ -549,20 +549,20 @@
     <div class="flow-steps">
       <div class="flow-step">
         <span class="badge" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">NPS Replacement</span>
-        <span>RSR occupies the same board-level reporting slot as NPS but is computed daily from real interaction data rather than collected via survey at low frequency. A single number that moves in response to actual customer outcomes, with full causal traceability into which streams, issue types, risk profiles, and agent behaviours are driving it.</span>
+        <span>EVI occupies the same board-level reporting slot as NPS but is computed daily from real interaction data rather than collected via survey at low frequency. A single number that moves in response to actual customer outcomes, with full causal traceability into which streams, issue types, risk profiles, and agent behaviours are driving it.</span>
       </div>
       <div class="flow-step">
         <span class="badge" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">Traceability</span>
-        <span>Every RSR movement is explainable bottom-up: RSR shifts because <code>portfolio_revenue_at_risk</code> shifted, because <code>resolved_revenue_at_risk</code> shifted for specific customers, because RSI moved, because of specific issue types, agents, or friction patterns. No survey lag, no sample bias, no black box.</span>
+        <span>Every EVI movement is explainable bottom-up: EVI shifts because <code>portfolio_revenue_at_risk</code> shifted, because <code>resolved_revenue_at_risk</code> shifted for specific customers, because RSI moved, because of specific issue types, agents, or friction patterns. No survey lag, no sample bias, no black box.</span>
       </div>
       <div class="flow-step">
         <span class="badge" style="color:#b41e1e;background:rgba(180,30,30,.06);border-color:rgba(180,30,30,.2);">Revenue Weighting</span>
-        <span>Unlike NPS, RSR is anchored on <code>resolved_cltv</code> — what each customer is actually worth. A deteriorating high-value customer with high RSI contributes more to <code>portfolio_revenue_at_risk</code> and therefore moves RSR more than a stable low-value customer. The score reflects commercial exposure, not just volume of dissatisfaction.</span>
+        <span>Unlike NPS, EVI is anchored on <code>resolved_cltv</code> — what each customer is actually worth. A deteriorating high-value customer with high RSI contributes more to <code>portfolio_revenue_at_risk</code> and therefore moves EVI more than a stable low-value customer. The score reflects commercial exposure, not just volume of dissatisfaction.</span>
       </div>
     </div>
 
     <div class="callout" style="margin-top:14px;border:1px solid rgba(180,30,30,.2);background:rgba(180,30,30,.05);color:#b41e1e;">
-      ✓ Pipeline complete. Full dependency chain: CFS → RSI → resolved_revenue_at_risk → portfolio aggregation → RSR. Every metric from agent performance to portfolio health is traceable through the full chain back to the raw interaction transcript and CRM metadata ingested at Phase 0.
+      ✓ Pipeline complete. Full dependency chain: CFS → RSI → resolved_revenue_at_risk → portfolio aggregation → EVI. Every metric from agent performance to portfolio health is traceable through the full chain back to the raw interaction transcript and CRM metadata ingested at Phase 0.
     </div>
   </div>
 
